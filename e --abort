@@ -1,0 +1,46 @@
+[33mc25179c[m[33m ([m[1;36mHEAD[m[33m)[m Update project
+[33m4375324[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m Initial commit
+[33mb3b7914[m Merge remote changes
+[33m56c42c3[m Merge remote changes
+[33m6922380[m Merge remote changes
+[33m15fd912[m Merge remote changes
+[33mf083f63[m Merge remote changes
+[33m9d81629[m Merge remote changes
+[33m4912be4[m Merge remote changes
+[33m5405bf5[m Merge remote changes
+[33m78725b4[m Merge remote changes
+[33md888563[m Merge remote changes
+[33mcdc1c00[m Merge remote changes
+[33m0542de7[m Merge remote changes
+[33mbb61df4[m Rebrand platform as GramCare and update role-based dashboards
+[33mead029c[m Refactor application structure and remove obsolete code
+[33m420babb[m fix legacy Supabase form schemas
+[33m9e7a628[m fix(schema): update appointments migration with complete constraint checks and verification query
+[33mdcf59c8[m fix(appointments): resolve schema cache relationship error and update doctor api
+[33m5545466[m Fix appointment relationship loading
+[33m755396d[m Upgrade GramCare patient module
+[33m915dad4[m Upgrade GramCare patient module
+[33m0fc57d2[m Upgrade GramCare patient module
+[33m0a77d33[m Upgrade GramCare patient module
+[33m4767826[m Remove Reset Demo Data modal/button from Patients Page UI per user request, preserving seamless patient registration and sample data
+[33m1744b91[m Add SIH Demo Patients System (Sections 31-38): 6 distinct demo patients (GC-DEMO-001..006), is_demo flag, DEMO badges, demo toggle filter, idempotent migration 202609090009, and safe Reset Demo Data RPC
+[33m82a33f5[m Add complete connected demo data system: seed migration 202609090008, appointments table, doctors directory, facilities catalog, and hospital workflow
+[33m7b48711[m Finalize GramCare for SIH 2026: Add seed demo data migration 202609090007, comprehensive intake registration, and verified production build
+[33m5023874[m Add consolidated migration 202609090006 for complete Supabase schema, RLS policies, and PostgREST schema cache reload
+[33m57bfc61[m Fix complete Supabase data flow: remove silent demo fallbacks, grant clean RLS policies, execute direct patient CRUD, and sync real database metrics
+[33m8ca11bf[m Remove Impact and Benefits section from workspace page
+[33m2b4cf47[m Audit and complete GramCare for SIH26133 with CDSS explainability modal, ASHA today tasks queue, and global font scaling
+[33m884f650[m Remove email verification requirement for instant signup login and direct workspace access
+[33m4434666[m Fix PostCSS/Tailwind font import parser bug, add darkMode class config, and build multi-step dynamic role registration for ASHA, Doctor, and Health Admin
+[33m5663376[m Update root layout with font link tags for clean stylesheet rendering
+[33m5db2161[m GramCare complete platform upgrade: hospital portal, 7-tab patient timeline, explainable AI risk scoring, village analytics topology map, and migration 202609090004
+[33mabc1579[m Enforce strict Supabase email verification auth flow with edge middleware protection and verify-email handler
+[33m0518c58[m Fix signup Supabase email rate limit error with auto direct login fallback
+[33m0a88340[m Add User Profile, Settings, English+Hindi Localization, Global Light/Dark Theme, and Accessibility Scaling
+[33mbc0548e[m SIH26133 GramCare platform enhancements: Doctor dashboard, AI risk triage, digital referrals, follow-up portal, analytics, and offline sync
+[33m3928f1b[m Fix input icon text overlap and remove Impact section from dashboard
+[33m1eeacda[m UI Overhaul: Fix input text overlap bug, increase font size, dynamic Admin/Doctor greeting, and SIH 2026 Impact & Benefits showcase with generated images
+[33m1c9d939[m Fix missing lucide-react dependency
+[33mb892e38[m Implement GramCare offline-first platform, AI risk prediction, and dashboard updates
+[33ma8e4657[m Add project source
+[33m43d4103[m Initial project source

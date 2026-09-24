@@ -1,0 +1,297 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --app-font-scale: 1;
+  --app-base-font-size: 16px;
+}
+
+html[data-font-size="small"] {
+  --app-font-scale: 0.875;
+  --app-base-font-size: 14px;
+}
+
+html[data-font-size="default"] {
+  --app-font-scale: 1;
+  --app-base-font-size: 16px;
+}
+
+html[data-font-size="large"] {
+  --app-font-scale: 1.125;
+  --app-base-font-size: 18px;
+}
+
+html[data-font-size="xlarge"] {
+  --app-font-scale: 1.25;
+  --app-base-font-size: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #f8fafc;
+  scroll-behavior: smooth;
+  font-size: var(--app-base-font-size) !important;
+}
+
+body {
+  margin: 0;
+  color: #0f172a;
+  background: #f8fafc;
+  font-family: 'Inter', 'Noto Sans Devanagari', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Base input styling */
+.input {
+  @apply w-full rounded-xl border border-slate-300 bg-white py-3 text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-sm;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Explicit input padding classes */
+.input-icon-left {
+  padding-left: 3.25rem !important;
+  padding-right: 1rem !important;
+}
+
+.input-icon-both {
+  padding-left: 3.25rem !important;
+  padding-right: 5.5rem !important;
+}
+
+.primary-btn {
+  @apply inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-base font-bold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.98] disabled:opacity-60;
+}
+
+.secondary-btn {
+  @apply inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-base font-bold text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98];
+}
+
+.card, .panel {
+  @apply rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-200;
+}
+
+.eyebrow {
+  @apply text-sm font-bold uppercase tracking-[0.16em] text-blue-700;
+}
+
+.section-title {
+  @apply mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-5xl;
+}
+
+.nav-link {
+  @apply text-base font-semibold text-slate-600 transition hover:text-blue-700;
+}
+
+.footer-link {
+  @apply text-slate-300 transition hover:text-white;
+}
+
+/* -------------------------------------------------------------
+   GLOBAL HEALTHCARE DARK THEME OVERRIDES
+   ------------------------------------------------------------- */
+html.dark {
+  background-color: #0b132b !important;
+  color: #f8fafc !important;
+}
+
+html.dark body {
+  background-color: #0b132b !important;
+  color: #f8fafc !important;
+}
+
+html.dark aside {
+  background-color: #070a14 !important;
+  border-color: #1e293b !important;
+}
+
+html.dark .card,
+html.dark .panel {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .input {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .input::placeholder {
+  color: #64748b !important;
+}
+
+html.dark select.input {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark .secondary-btn {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .secondary-btn:hover {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+}
+
+html.dark table th {
+  background-color: #0f172a !important;
+  color: #94a3b8 !important;
+  border-color: #334155 !important;
+}
+
+html.dark table td {
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark table tr:hover {
+  background-color: #334155/50 !important;
+}
+
+html.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+html.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-500 {
+  color: #64748b !important;
+}
+
+html.dark .bg-slate-50 {
+  background-color: #0f172a !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+}
+
+html.dark .bg-white {
+  background-color: #1e293b !important;
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200 {
+  border-color: #334155 !important;
+}
+
+/* -------------------------------------------------------------
+   ACCESSIBILITY: HIGH CONTRAST & REDUCED MOTION
+   ------------------------------------------------------------- */
+html.high-contrast {
+  --app-base-font-size: 17px;
+}
+
+html.high-contrast .card,
+html.high-contrast .panel,
+html.high-contrast .input,
+html.high-contrast button {
+  border-width: 2px !important;
+  border-color: #000000 !important;
+}
+
+html.dark.high-contrast .card,
+html.dark.high-contrast .panel,
+html.dark.high-contrast .input,
+html.dark.high-contrast button {
+  border-color: #ffffff !important;
+}
+
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* 3D Flashcard Flip Animation CSS */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flip-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 1.5rem;
+  top: 0;
+  left: 0;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Keyframe Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
