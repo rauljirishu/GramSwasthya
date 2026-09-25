@@ -24,6 +24,13 @@ export function useTranslation() {
     if (entry && entry.en) {
       return entry.en;
     }
+    // Components sometimes use a descriptive fallback while their translation
+    // key differs from the canonical dictionary key. Resolve that English copy
+    // back to its translated entry before leaving it untranslated.
+    if (fallback) {
+      const matchingEntry = Object.values(translations).find(candidate => candidate.en === fallback);
+      if (matchingEntry?.[language]) return matchingEntry[language]!;
+    }
     // 4. Default english uiLabels fallback
     const labelsObj = uiLabels('en') as Record<string, string>;
     if (labelsObj && labelsObj[key]) {
@@ -34,4 +41,3 @@ export function useTranslation() {
 
   return { t, language };
 }
-

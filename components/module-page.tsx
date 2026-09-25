@@ -84,8 +84,8 @@ export function ModulePage({ module }: { module: string }) {
     }
 
     if (module === 'workers') {
-      const { data: userList, error: workerErr } = await supabase.from('users').select('id,name,role,email,phone,facilities(name)').order('name');
-      if (workerErr) setNotice('Unable to load authorised field worker roster.');
+      const { data: userList, error: workerErr } = await supabase.from('users').select('id,name,role,email,phone,facilities(name)').neq('role', 'patient').order('name');
+      if (workerErr) setNotice(`Unable to load the staff directory: ${workerErr.message}. Apply the latest Supabase migration if access is denied.`);
       else setWorkers((userList || []) as unknown as WorkerRow[]);
     } else {
       const { data: requests, error } = await supabase.from('support_requests').select('id,request_type,title,details,priority,status,created_at,facilities(name)').eq('request_type', data.requestType).order('created_at', { ascending: false });
