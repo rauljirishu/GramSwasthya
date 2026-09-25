@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ArrowLeft, Lock, ShieldCheck, UserPlus, Crown, Building2, HeartPulse, UserCheck, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Lock, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [requestedRole, setRequestedRole] = useState('patient');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -33,7 +34,7 @@ export default function SignupPage() {
       options: {
         data: {
           name: name.trim(),
-          requested_role: 'patient'
+          requested_role: requestedRole
         }
       }
     });
@@ -44,19 +45,29 @@ export default function SignupPage() {
       return;
     }
 
-    // Staff roles are assigned by Central Authority after account creation.
+    // Role requests are recorded for Central Authority review. Self-signup
+    // must never grant staff privileges; patient remains the safe initial role.
     if (data.user) {
       const { data: profile } = await supabase.from('users').select('id,role').eq('id', data.user.id).single();
       if (!profile) {
-        await supabase.from('users').upsert({
+        const { error: profileError } = await supabase.from('users').upsert({
           id: data.user.id,
           name: name.trim(),
           email: targetEmail,
           role: 'patient'
         });
+        if (profileError) {
+          setError(`Account created, but the profile could not be initialized: ${profileError.message}`);
+          setBusy(false);
+          return;
+        }
       }
 
-      router.replace('/patient-dashboard');
+      if (requestedRole !== 'patient') {
+        router.replace(`/login?roleRequest=${encodeURIComponent(requestedRole)}`);
+      } else {
+        router.replace('/patient-dashboard');
+      }
       return;
     }
 
@@ -74,9 +85,9 @@ export default function SignupPage() {
           <p className="mt-2 text-sm font-semibold text-blue-200">Connected Healthcare for Rural Communities</p>
         </div>
         <div>
-          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">PATIENT ACCOUNT CREATION</span>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">ACCOUNT ROLE REQUEST</span>
           <h1 className="mt-5 max-w-lg text-5xl font-black leading-tight">Create your GramCare account.</h1>
-          <p className="mt-5 max-w-md leading-7 text-blue-100">Create a patient account to view your own linked health information. Staff accounts are assigned by Central Authority.</p>
+          <p className="mt-5 max-w-md leading-7 text-blue-100">Choose your role scope. Staff access is activated by Central Authority after your account is reviewed.</p>
         </div>
         <p className="text-sm text-blue-200">Data privacy and access are protected by role-based database policies.</p>
       </section>
@@ -93,7 +104,7 @@ export default function SignupPage() {
             </div>
             <div>
               <h1 className="text-2xl font-black text-slate-900">Create new account</h1>
-              <p className="text-xs text-slate-500">Create your personal patient account</p>
+              <p className="text-xs text-slate-500">Register and request your role scope</p>
             </div>
           </div>
 
@@ -108,6 +119,17 @@ export default function SignupPage() {
             <label className="block text-xs font-bold text-slate-800">
               Email Address
               <input required type="email" value={email} onChange={event => setEmail(event.target.value)} className="input mt-1.5 py-2 text-xs font-semibold" placeholder="e.g. sunita@gramcare.gov.in" />
+            </label>
+
+            <label className="block text-xs font-bold text-slate-800">
+              Account Role Scope
+              <select value={requestedRole} onChange={event => setRequestedRole(event.target.value)} className="input mt-1.5 py-2 text-xs font-semibold">
+                <option value="central_authority">Central Authority</option>
+                <option value="phc_head">Area / PHC Head</option>
+                <option value="phc_worker">PHC Worker</option>
+                <option value="patient">Patient Account (Personal Linked Record)</option>
+              </select>
+              {requestedRole !== 'patient' && <span className="mt-1 block text-[11px] font-medium text-amber-700">Staff role requests need Central Authority approval before staff access is enabled.</span>}
             </label>
 
             <label className="block text-xs font-bold text-slate-800">

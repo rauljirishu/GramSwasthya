@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { uiRoleFor } from '@/lib/auth';
 import { 
@@ -24,6 +24,13 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
   const [notice, setNotice] = useState('');
+
+  useEffect(() => {
+    const requestedRole = new URLSearchParams(window.location.search).get('roleRequest');
+    if (!requestedRole) return;
+    const labels: Record<string, string> = { central_authority: 'Central Authority', phc_head: 'Area / PHC Head', phc_worker: 'PHC Worker' };
+    setNotice(`Your ${labels[requestedRole] || 'staff'} role request was recorded. Central Authority must approve staff access.`);
+  }, []);
 
   async function sendPasswordReset() {
     if (!email.trim()) {

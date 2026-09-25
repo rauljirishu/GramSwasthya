@@ -844,20 +844,15 @@ export async function overrideRiskAssessment(
 }
 
 export async function getFacilities(): Promise<Facility[]> {
-  try {
-    const { data, error } = await supabase
-      .from('facilities')
-      .select('*')
-      .order('name');
-    if (error) {
-      console.error('Supabase getFacilities error:', error);
-      throw error;
-    }
-    return (data ?? []) as Facility[];
-  } catch (err) {
-    console.error('getFacilities failed:', err);
-    return [];
+  const { data, error } = await supabase
+    .from('facilities')
+    .select('*')
+    .order('name');
+  if (error) {
+    console.error('Supabase getFacilities error:', error);
+    throw new Error(`Facilities directory could not be loaded: ${error.message}`);
   }
+  return (data ?? []) as Facility[];
 }
 
 export async function getNearbyFacilities(
@@ -906,35 +901,30 @@ export async function getDistinctVillages(): Promise<string[]> {
 }
 
 export async function getDoctors(): Promise<DoctorUser[]> {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('role', 'doctor')
-      .order('name');
-    if (error) {
-      console.error('Supabase getDoctors error:', error);
-      throw error;
-    }
-    const doctors = (data ?? []) as DoctorUser[];
-    const facilityIds = [...new Set(doctors.map(doctor => doctor.facility_id).filter(Boolean))] as string[];
-    if (!facilityIds.length) return doctors;
-
-    const { data: facilities, error: facilitiesError } = await supabase
-      .from('facilities')
-      .select('*')
-      .in('id', facilityIds);
-    if (facilitiesError) throw facilitiesError;
-
-    const facilityById = new Map((facilities ?? []).map(facility => [facility.id, facility as Facility]));
-    return doctors.map(doctor => ({
-      ...doctor,
-      facility: doctor.facility_id ? facilityById.get(doctor.facility_id) : undefined,
-    }));
-  } catch (err) {
-    console.error('getDoctors failed:', err);
-    return [];
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('role', 'doctor')
+    .order('name');
+  if (error) {
+    console.error('Supabase getDoctors error:', error);
+    throw new Error(`Doctor directory could not be loaded: ${error.message}`);
   }
+  const doctors = (data ?? []) as DoctorUser[];
+  const facilityIds = [...new Set(doctors.map(doctor => doctor.facility_id).filter(Boolean))] as string[];
+  if (!facilityIds.length) return doctors;
+
+  const { data: facilities, error: facilitiesError } = await supabase
+    .from('facilities')
+    .select('*')
+    .in('id', facilityIds);
+  if (facilitiesError) throw new Error(`Doctor facility assignments could not be loaded: ${facilitiesError.message}`);
+
+  const facilityById = new Map((facilities ?? []).map(facility => [facility.id, facility as Facility]));
+  return doctors.map(doctor => ({
+    ...doctor,
+    facility: doctor.facility_id ? facilityById.get(doctor.facility_id) : undefined,
+  }));
 }
 
 export async function getAppointments(): Promise<Appointment[]> {

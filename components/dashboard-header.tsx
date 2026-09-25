@@ -103,7 +103,7 @@ export function DashboardHeader() {
               value={language}
               onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
               className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-100 outline-none cursor-pointer pr-1"
-              title="Select Interface Language"
+              title={t('interfaceLanguage', 'Select Interface Language')}
             >
               {languageOptions.map(option => (
                 <option value={option.code} key={option.code} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
@@ -117,17 +117,17 @@ export function DashboardHeader() {
           <button
             onClick={toggleTheme}
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-extrabold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-            title="Toggle Light/Dark Theme"
+            title={t('theme', 'Toggle Light/Dark Theme')}
           >
             {theme === 'dark' ? (
               <>
                 <Sun className="h-3.5 w-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Light</span>
+                <span className="hidden sm:inline">{t('light', 'Light')}</span>
               </>
             ) : (
               <>
                 <Moon className="h-3.5 w-3.5 text-indigo-600" />
-                <span className="hidden sm:inline">Dark</span>
+                <span className="hidden sm:inline">{t('dark', 'Dark')}</span>
               </>
             )}
           </button>

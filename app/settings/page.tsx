@@ -4,9 +4,11 @@ import { DashboardShell } from '@/components/dashboard-shell';
 import { useSettings } from '@/lib/context/settings-context';
 import { languageOptions } from '@/lib/i18n/translations';
 import { Settings } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n/use-translation';
 
 export default function SettingsPage() {
   const { language, setLanguage, theme, setTheme } = useSettings();
+  const { t } = useTranslation();
 
   return (
     <DashboardShell>
@@ -16,22 +18,22 @@ export default function SettingsPage() {
             <Settings className="h-5 w-5" />
           </div>
           <div>
-            <p className="eyebrow">Preferences</p>
-            <h1 className="text-2xl font-black text-slate-900">Settings</h1>
+            <p className="eyebrow">{t('preferences', 'Preferences')}</p>
+            <h1 className="text-2xl font-black text-slate-900">{t('navSettings', 'Settings')}</h1>
           </div>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <label className="text-sm font-bold text-slate-700">
-            Interface language
+            {t('interfaceLanguage', 'Interface language')}
             <select value={language} onChange={event => setLanguage(event.target.value as typeof language)} className="input mt-1">
               {languageOptions.map(option => <option key={option.code} value={option.code}>{option.label}</option>)}
             </select>
           </label>
           <label className="text-sm font-bold text-slate-700">
-            Theme
+            {t('theme', 'Theme')}
             <select value={theme} onChange={event => setTheme(event.target.value as typeof theme)} className="input mt-1">
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
+              <option value="light">{t('light', 'Light')}</option>
+              <option value="dark">{t('dark', 'Dark')}</option>
             </select>
           </label>
         </div>

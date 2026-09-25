@@ -6,6 +6,7 @@ import { DashboardShell } from '@/components/dashboard-shell';
 import { supabase } from '@/lib/supabase/client';
 import { getDoctors } from '@/lib/api/doctor';
 import type { DoctorUser } from '@/lib/types';
+import { currentRole } from '@/lib/auth';
 import { 
   Stethoscope, 
   Search, 
@@ -22,14 +23,28 @@ export default function DoctorsPage() {
   const [doctors, setDoctors] = useState<DoctorUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [notice, setNotice] = useState('');
+  const [role, setRole] = useState('');
 
   async function loadDoctors() {
     setLoading(true);
     try {
-      const docs = await getDoctors();
-      setDoctors(docs);
-    } catch (err) {
-      console.error('Failed to load doctors:', err);
+      const current = await currentRole();
+      setRole(current || '');
+      if (current === 'central') {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id,name,role,email,phone,specialization,facility_id,facilities(name)')
+          .neq('role', 'patient')
+          .order('name');
+        if (error) throw error;
+        setDoctors((data || []) as unknown as DoctorUser[]);
+      } else {
+        setDoctors(await getDoctors());
+      }
+      setNotice('');
+    } catch (err: any) {
+      setNotice(`The doctors and staff directory could not be loaded: ${err.message || 'Database access failed.'}`);
     } finally {
       setLoading(false);
     }
@@ -71,6 +86,9 @@ export default function DoctorsPage() {
           </Link>
         </header>
 
+        {role === 'central' && <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs font-semibold text-blue-900">Central Authority view: doctors and staff accounts across all registered PHCs.</div>}
+        {notice && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950">{notice}</div>}
+
         {/* Directory Search & Filter */}
         <section className="card p-6 border-slate-200 shadow-md space-y-6">
           <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-5">
@@ -85,7 +103,7 @@ export default function DoctorsPage() {
               />
             </div>
             <span className="text-xs font-bold text-slate-500">
-              Showing {filteredDoctors.length} Verified Doctors
+              Showing {filteredDoctors.length} {role === 'central' ? 'Doctors & Staff' : 'Doctors'}
             </span>
           </div>
 
@@ -104,9 +122,9 @@ export default function DoctorsPage() {
                         DR
                       </div>
                       <div>
-                        <h3 className="text-base font-black text-slate-900">Dr. {doc.name}</h3>
+                        <h3 className="text-base font-black text-slate-900">{['doctor', 'medical_officer'].includes(doc.role) ? 'Dr. ' : ''}{doc.name}</h3>
                         <p className="text-xs font-bold text-emerald-700">
-                          {doc.specialization || 'General Medical Officer'}
+                          {doc.specialization || String(doc.role || 'Staff').replaceAll('_', ' ')}
                         </p>
                       </div>
                     </div>
@@ -136,7 +154,7 @@ export default function DoctorsPage() {
                           <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Active Duty
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-extrabold text-blue-800">
-                          <ShieldCheck className="h-3 w-3 text-blue-600" /> Verified Practitioner
+                          <ShieldCheck className="h-3 w-3 text-blue-600" /> Authorised Staff
                         </span>
                       </div>
                     </div>
@@ -155,7 +173,7 @@ export default function DoctorsPage() {
             </div>
           ) : (
             <div className="p-12 text-center text-xs font-semibold text-slate-500">
-              No doctors found matching your search.
+              No {role === 'central' ? 'doctors or staff' : 'doctors'} found matching your search.
             </div>
           )}
         </section>
