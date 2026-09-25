@@ -183,7 +183,7 @@ export default function Login() {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 dark:text-white">{patientMode ? 'Patient Login' : 'Sign In to GramCare'}</h1>
-              <p className="text-xs text-slate-500">{patientMode ? 'Use your Patient Account ID and password.' : 'Enter your credentials to access your workspace'}</p>
+              <p className="text-xs text-slate-500">{patientMode ? 'Use your Patient Account ID or linked clinical PID and password.' : 'Enter your credentials to access your workspace'}</p>
             </div>
           </div>
 

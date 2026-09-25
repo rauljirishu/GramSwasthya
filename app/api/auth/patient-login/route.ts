@@ -32,12 +32,36 @@ export async function POST(request: Request) {
   const admin = createSupabaseClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
-  const { data: profile, error: lookupError } = await admin
+  const { data: accountProfile, error: lookupError } = await admin
     .from('users')
-    .select('email, role')
+    .select('email, role, requested_role')
     .eq('account_id', patientId)
     .maybeSingle();
-  if (lookupError || !profile?.email || profile.role !== 'patient') return invalidCredentials();
+  if (lookupError) return invalidCredentials();
+
+  let profile = accountProfile;
+  if (!profile) {
+    const { data: patient, error: patientLookupError } = await admin
+      .from('patients')
+      .select('id')
+      .eq('patient_code', patientId)
+      .maybeSingle();
+    if (patientLookupError || !patient) return invalidCredentials();
+    const { data: link, error: linkLookupError } = await admin
+      .from('patient_accounts')
+      .select('user_id')
+      .eq('patient_id', patient.id)
+      .maybeSingle();
+    if (linkLookupError || !link) return invalidCredentials();
+    const { data: linkedProfile, error: profileLookupError } = await admin
+      .from('users')
+      .select('email, role, requested_role')
+      .eq('id', link.user_id)
+      .maybeSingle();
+    if (profileLookupError) return invalidCredentials();
+    profile = linkedProfile;
+  }
+  if (!profile?.email || profile.role !== 'patient' || profile.requested_role !== 'patient') return invalidCredentials();
 
   const cookieStore = await cookies();
   const sessionClient = createServerClient(supabaseUrl, anonKey, {
