@@ -99,7 +99,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const nav = allNavKeys.filter(x => (x[5] as readonly GramRole[]).includes(role));
+  const nav = allNavKeys.filter(x => (x[4] as readonly GramRole[]).includes(role));
 
   return (
     <div className="min-h-screen bg-[#f5f8fc] dark:bg-slate-950 text-slate-900 dark:text-slate-100 md:flex transition-colors">
