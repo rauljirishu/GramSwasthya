@@ -84,12 +84,29 @@ export default function Login() {
         .from('users')
         .select('role')
         .eq('id', data.user.id)
-        .single();
+        .maybeSingle();
 
-      const userRole = profileError ? '' : profile?.role || '';
+      if (profileError) {
+        const detail = profileError.code === 'PGRST116'
+          ? 'No GramCare profile row exists for this authenticated account in public.users.'
+          : `GramCare could not read the profile role: ${profileError.message}`;
+        setError(`${detail} Apply the current Supabase migrations and have an administrator provision the correct role; signing up again will not repair this account.`);
+        await supabase.auth.signOut();
+        setBusy(false);
+        return;
+      }
+
+      const userRole = profile?.role || '';
 
       if (!userRole) {
-        setError('Your account does not have an assigned GramCare role. Please contact an administrator.');
+        const requested = String(data.user.user_metadata?.requested_role || '');
+        const requestedLabels: Record<string, string> = {
+          central_authority: 'Central Authority', phc_head: 'PHC Head', phc_worker: 'PHC Worker'
+        };
+        const requestText = requestedLabels[requested]
+          ? `This account requested ${requestedLabels[requested]} access, but it has not been approved and assigned yet.`
+          : 'This account does not have an assigned GramCare role yet.';
+        setError(`${requestText} Central Authority must approve staff access; if this is an existing account, an administrator must restore its profile role.`);
         await supabase.auth.signOut();
         setBusy(false);
         return;
