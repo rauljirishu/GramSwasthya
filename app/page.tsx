@@ -132,9 +132,12 @@ export default function Home() {
             <Calendar className="h-4 w-4" /> Book Appointment
           </button>
 
-          <Link href="/login" className="secondary-btn py-2 text-xs font-extrabold">
-            Sign in
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/login?mode=patient" className="secondary-btn py-2 text-xs font-extrabold">
+              Login as a patient
+            </Link>
+            <Link href="/login" className="secondary-btn py-2 text-xs font-extrabold">Sign in</Link>
+          </div>
         </div>
       </header>
 

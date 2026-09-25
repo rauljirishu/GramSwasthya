@@ -24,6 +24,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
   const [notice, setNotice] = useState('');
+  const [patientMode, setPatientMode] = useState(false);
+  const [patientId, setPatientId] = useState('');
+
+  useEffect(() => {
+    setPatientMode(new URLSearchParams(window.location.search).get('mode') === 'patient');
+  }, []);
 
   useEffect(() => {
     const requestedRole = new URLSearchParams(window.location.search).get('roleRequest');
@@ -50,6 +56,33 @@ export default function Login() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (patientMode) {
+      if (!patientId.trim() || !password) {
+        setError('Enter your Patient Account ID and password.');
+        return;
+      }
+      setBusy(true);
+      setError('');
+      try {
+        await supabase.auth.signOut();
+        const response = await fetch('/api/auth/patient-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patientId: patientId.trim(), password })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to sign in. Check your Patient ID and password.');
+        localStorage.removeItem('override_role');
+        localStorage.removeItem('gramcare_role');
+        localStorage.removeItem('demo_role');
+        router.replace('/patient-dashboard');
+      } catch (err: any) {
+        setError(err.message || 'Unable to sign in. Check your Patient ID and password.');
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     if (!email.trim() || !password) {
       setError('Please enter your account email and password.');
       return;
@@ -149,21 +182,22 @@ export default function Login() {
               <KeyRound className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-900 dark:text-white">Sign In to GramCare</h1>
-              <p className="text-xs text-slate-500">Enter your credentials to access your workspace</p>
+              <h1 className="text-xl font-black text-slate-900 dark:text-white">{patientMode ? 'Patient Login' : 'Sign In to GramCare'}</h1>
+              <p className="text-xs text-slate-500">{patientMode ? 'Use your Patient Account ID and password.' : 'Enter your credentials to access your workspace'}</p>
             </div>
           </div>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
-              Account Email <span className="text-rose-500">*</span>
+              {patientMode ? 'Patient Account ID' : 'Account Email'} <span className="text-rose-500">*</span>
               <input
                 required
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                type={patientMode ? 'text' : 'email'}
+                value={patientMode ? patientId : email}
+                onChange={e => patientMode ? setPatientId(e.target.value) : setEmail(e.target.value)}
                 className="input mt-1.5 py-2.5 text-xs font-semibold"
-                placeholder="name@example.com"
+                placeholder={patientMode ? 'PID-…' : 'name@example.com'}
+                autoCapitalize={patientMode ? 'characters' : undefined}
               />
             </label>
 
@@ -177,11 +211,11 @@ export default function Login() {
               </span>
             </label>
 
-            <div className="-mt-2 text-right">
+            {!patientMode && <div className="-mt-2 text-right">
               <button type="button" onClick={sendPasswordReset} disabled={resetBusy} className="text-xs font-bold text-blue-600 hover:underline disabled:opacity-50">
                 {resetBusy ? 'Sending reset link…' : 'Forgot password?'}
               </button>
-            </div>
+            </div>}
 
             {error && (
               <div role="alert" className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs font-bold text-rose-700">
@@ -195,7 +229,7 @@ export default function Login() {
               className="primary-btn w-full justify-center text-xs py-3 bg-blue-600 hover:bg-blue-700 text-white font-black shadow-lg"
             >
               <Lock className="h-4 w-4" />
-              {busy ? 'Authenticating...' : 'Sign In to Workspace'}
+              {busy ? 'Authenticating...' : patientMode ? 'Sign In as Patient' : 'Sign In to Workspace'}
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>

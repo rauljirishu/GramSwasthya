@@ -40,8 +40,11 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 DATA_GOV_IN_API_KEY=<optional server-only data.gov.in API key for the national facility directory>
 ```
+
+Keep `SUPABASE_SERVICE_ROLE_KEY` server-only. It enables Patient Account ID sign-in: patients enter the `PID-...` account ID issued at signup and their account password, without entering an email at login. The clinical record PID is separate from the account ID. Run all Supabase migrations in filename order, including `202609260004_repair_missing_user_profiles.sql`, before using patient-ID sign-in. Missing profiles are repaired with patient access; staff access still requires Central Authority approval.
 
 The PHC finder combines GramCare facilities with coordinates and OpenStreetMap results for the selected area. If `DATA_GOV_IN_API_KEY` is configured, it also searches the Government of India National Hospital Directory by state and district. That directory reports facility coordinates and contact fields where available; it is updated periodically and does not guarantee live operating status. Without the key, manual location search and nearby public-map results remain available.
 
