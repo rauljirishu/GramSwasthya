@@ -102,6 +102,8 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
       const geocode = await reverseGeocodeClient(pos.latitude, pos.longitude);
       if (geocode.ok && geocode.data.village) {
         setGuestLocationStr(`${geocode.data.village}, ${geocode.data.district || ''}`);
+        if (geocode.data.state) setModalState(geocode.data.state);
+        if (geocode.data.district) setModalDistrict(geocode.data.district);
       } else {
         setGuestLocationStr(`GPS Coordinates (${pos.latitude.toFixed(3)}° N, ${pos.longitude.toFixed(3)}° E)`);
       }
@@ -111,7 +113,9 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
           id: n.id,
           name: n.name,
           distanceKm: Number(n.distanceKm.toFixed(1)),
-          village: n.village
+          village: n.village,
+          state: n.state,
+          district: n.district
         }));
         setNearbyList(formatted);
         setFacilityId(formatted[0].id);
@@ -123,33 +127,10 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
       }
     } catch (err: any) {
       console.warn('GPS detection warning:', err);
-      // Fallback location calculation using region default center
-      try {
-        const defaultNearby = await getNearbyFacilities(22.3072, 73.1812);
-        if (defaultNearby && defaultNearby.length > 0) {
-          const formatted = defaultNearby.map(n => ({
-            id: n.id,
-            name: n.name,
-            distanceKm: Number(n.distanceKm.toFixed(1)),
-            village: n.village
-          }));
-          setNearbyList(formatted);
-          setFacilityId(formatted[0].id);
-          setNearestPHCInfo({
-            id: formatted[0].id,
-            name: formatted[0].name,
-            distanceKm: formatted[0].distanceKm
-          });
-        }
-      } catch {
-        if (facilities.length > 0) {
-          setFacilityId(facilities[0].id);
-          setNearestPHCInfo({
-            id: facilities[0].id,
-            name: facilities[0].name,
-            distanceKm: 1.4
-          });
-        }
+      setNearestPHCInfo(null);
+      setErrorMsg('Location permission denied or unavailable. Please select your State & District manually below.');
+      if (facilities.length > 0 && !facilityId) {
+        setFacilityId(facilities[0].id);
       }
     } finally {
       setLocationDetecting(false);
@@ -183,11 +164,6 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
           }
           if (fcs && fcs.length > 0) {
             setFacilityId(fcs[0].id);
-            setNearestPHCInfo({
-              id: fcs[0].id,
-              name: fcs[0].name,
-              distanceKm: 1.4
-            });
           }
 
           // Auto-trigger live GPS location detection on modal open!
