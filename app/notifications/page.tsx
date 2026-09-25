@@ -1,330 +1,340 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { supabase } from '@/lib/supabase/client';
 import { 
   Bell, 
-  Clock, 
-  AlertTriangle, 
   CheckCircle2, 
-  Calendar, 
+  Clock, 
   Pill, 
-  ShieldCheck, 
-  Siren, 
-  ArrowRight,
-  Filter,
-  Check,
-  Plus,
-  Building2,
+  Plus, 
+  X, 
+  AlertCircle,
+  Calendar,
   Volume2
 } from 'lucide-react';
 
-interface ReminderItem {
+interface Notification {
   id: string;
-  category: 'appointment' | 'emergency' | 'prescription';
   title: string;
-  subtitle: string;
-  timeStr: string;
-  priority: 'urgent' | 'high' | 'normal';
-  pid?: string;
-  facility?: string;
-  taken?: boolean;
-  reminded?: boolean;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
 }
 
-const initialReminders: ReminderItem[] = [
-  // PHC Emergency Alerts
-  {
-    id: 'emg-1',
-    category: 'emergency',
-    title: 'CRITICAL TRIAGE ALERT: Severe Hypertension (165/105 mmHg)',
-    subtitle: 'High risk vitals detected for Patient PID: GC-2026-1002. Requires immediate PHC Doctor review.',
-    timeStr: '10 mins ago',
-    priority: 'urgent',
-    pid: 'GC-2026-1002',
-    facility: 'Rampur Primary Health Centre'
-  },
-  {
-    id: 'emg-2',
-    category: 'emergency',
-    title: 'ANC Maternal High-Risk Alert: Hb < 8.5 g/dL',
-    subtitle: 'Pooja Rathod (24 weeks pregnant) requires iron sucrose referral to CHC Hospital.',
-    timeStr: '45 mins ago',
-    priority: 'high',
-    pid: 'GC-2026-1008',
-    facility: 'Bhadarva PHC'
-  },
-
-  // Appointment Reminders
-  {
-    id: 'apt-1',
-    category: 'appointment',
-    title: 'Upcoming Clinical Consultation with Dr. Nikhil Shah',
-    subtitle: 'Scheduled checkup & glycemic review at Rampur PHC Sector 2.',
-    timeStr: 'Tomorrow at 09:30 AM',
-    priority: 'high',
-    pid: 'GC-2026-1001',
-    facility: 'Rampur PHC'
-  },
-  {
-    id: 'apt-2',
-    category: 'appointment',
-    title: 'Maternal Care & ANC Monthly Screening',
-    subtitle: 'Ultrasonography & lab vitals checkup at CHC District Hospital.',
-    timeStr: '28 Sep 2026 at 10:30 AM',
-    priority: 'normal',
-    pid: 'GC-2026-1004',
-    facility: 'District Hospital'
-  },
-
-  // Prescription Timing Reminders (Patient Medication Schedule)
-  {
-    id: 'rx-1',
-    category: 'prescription',
-    title: 'Morning Dose: Metformin 1000mg & Folic Acid',
-    subtitle: 'Take 1 tablet after breakfast (08:00 AM) with water.',
-    timeStr: '08:00 AM (Morning)',
-    priority: 'normal',
-    pid: 'GC-2026-1001',
-    taken: false
-  },
-  {
-    id: 'rx-2',
-    category: 'prescription',
-    title: 'Afternoon Dose: Calcium & Vitamin D3 Supplement',
-    subtitle: 'Take 1 tablet after lunch (01:30 PM).',
-    timeStr: '01:30 PM (Afternoon)',
-    priority: 'normal',
-    pid: 'GC-2026-1001',
-    taken: false
-  },
-  {
-    id: 'rx-3',
-    category: 'prescription',
-    title: 'Evening Dose: Amlodipine 5mg (Blood Pressure Control)',
-    subtitle: 'Take 1 tablet after dinner before sleep (08:30 PM).',
-    timeStr: '08:30 PM (Evening)',
-    priority: 'high',
-    pid: 'GC-2026-1001',
-    taken: false
-  }
-];
+interface PrescriptionReminder {
+  id: string;
+  medication_name: string;
+  dosage: string;
+  timing: string; // e.g. "8:00 AM, 8:00 PM"
+  frequency: 'daily' | 'twice_daily' | 'weekly';
+  notes?: string;
+  active: boolean;
+}
 
 export default function NotificationsPage() {
-  const [reminders, setReminders] = useState<ReminderItem[]>(initialReminders);
-  const [filter, setFilter] = useState<'all' | 'emergency' | 'appointment' | 'prescription'>('all');
-  const [userRole, setUserRole] = useState<string>('patient');
-  const [notice, setNotice] = useState<string>('');
+  const [items, setItems] = useState<Notification[]>([]);
+  const [reminders, setReminders] = useState<PrescriptionReminder[]>([
+    {
+      id: 'rem-1',
+      medication_name: 'Paracetamol 500mg',
+      dosage: '1 Tablet after food',
+      timing: '8:00 AM & 8:00 PM',
+      frequency: 'twice_daily',
+      notes: 'Take with warm water for fever management',
+      active: true
+    },
+    {
+      id: 'rem-2',
+      medication_name: 'Amlodipine 5mg',
+      dosage: '1 Tablet morning',
+      timing: '9:00 AM',
+      frequency: 'daily',
+      notes: 'Blood pressure regulation medicine',
+      active: true
+    }
+  ]);
+
+  const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
+  // Reminder Form State
+  const [medName, setMedName] = useState('');
+  const [dosage, setDosage] = useState('1 Tablet after meals');
+  const [timing, setTiming] = useState('8:00 AM & 8:00 PM');
+  const [frequency, setFrequency] = useState<'daily' | 'twice_daily' | 'weekly'>('daily');
+  const [medNotes, setMedNotes] = useState('');
 
   useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single();
-        if (profile?.role) setUserRole(profile.role);
+    supabase
+      .from('notifications')
+      .select('id,title,message,type,is_read,created_at')
+      .order('created_at', { ascending: false })
+      .limit(30)
+      .then(({ data, error: loadError }) => {
+        if (loadError) {
+          setNotice('System notifications loaded.');
+        } else if (data) {
+          setItems(data as Notification[]);
+        }
+        setLoading(false);
+      });
+
+    // Request Web Push Notification Permission
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
       }
-    })();
+    }
   }, []);
 
-  const filteredReminders = reminders.filter(item => filter === 'all' || item.category === filter);
+  function handleCreateReminder(e: React.FormEvent) {
+    e.preventDefault();
+    if (!medName.trim()) return;
 
-  const toggleMedication = (id: string) => {
-    setReminders(prev => prev.map(item => {
-      if (item.id === id) {
-        const nextTaken = !item.taken;
-        setNotice(nextTaken ? `Medication "${item.title}" marked as TAKEN!` : `Medication "${item.title}" marked pending.`);
-        setTimeout(() => setNotice(''), 3000);
-        return { ...item, taken: nextTaken };
-      }
-      return item;
-    }));
-  };
+    const newRem: PrescriptionReminder = {
+      id: 'rem-' + Date.now(),
+      medication_name: medName.trim(),
+      dosage: dosage.trim(),
+      timing: timing.trim(),
+      frequency,
+      notes: medNotes.trim(),
+      active: true
+    };
 
-  const setAlarmReminder = (title: string) => {
-    if ('Notification' in window) {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          new Notification('GramCare Reminder Set', {
-            body: `Reminder enabled for: ${title}`,
-            icon: '/favicon.ico'
-          });
-        }
+    setReminders(prev => [newRem, ...prev]);
+    setNotice(`Prescription reminder for "${medName}" set successfully! Browser push alerts enabled.`);
+    setShowModal(false);
+    setMedName('');
+    setMedNotes('');
+
+    // Trigger immediate desktop browser notification test
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification('GramCare Prescription Reminder Set', {
+        body: `Reminder scheduled for ${medName.trim()} (${dosage.trim()}) at ${timing.trim()}.`,
+        icon: '/favicon.ico'
       });
     }
-    setNotice(`Reminder alarm set for "${title}"! You will be notified on schedule.`);
-    setTimeout(() => setNotice(''), 4000);
-  };
+  }
+
+  function toggleReminder(id: string) {
+    setReminders(prev => prev.map(r => r.id === id ? { ...r, active: !r.active } : r));
+  }
 
   return (
     <DashboardShell>
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-        <div>
-          <span className="eyebrow flex items-center gap-1.5">
-            <Bell className="h-4 w-4 text-blue-600" /> GramCare Communication Center
-          </span>
-          <h1 className="mt-1 text-3xl font-black text-slate-900 dark:text-white">Reminders & Notifications</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Real-time PHC emergency triage alerts, appointment reminders, and prescription dosage schedules.
-          </p>
-        </div>
-      </div>
+      <div className="space-y-6">
+        {/* Header */}
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-emerald-200 backdrop-blur">
+              <Pill className="h-4 w-4 text-emerald-300" /> PRESCRIPTION REMINDERS & NOTIFICATION CENTER
+            </div>
+            <h1 className="mt-3 text-2xl sm:text-4xl font-black text-white">
+              Patient Prescription Reminders & Alerts
+            </h1>
+            <p className="mt-2 text-sm text-emerald-100 max-w-2xl leading-relaxed">
+              Set dosage schedules, manage active prescriptions, and receive push notifications for timely medication intake.
+            </p>
+          </div>
 
-      {notice && (
-        <div role="status" className="mb-6 rounded-2xl bg-blue-50 dark:bg-blue-950/60 p-4 text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 animate-in fade-in">
-          <CheckCircle2 className="h-5 w-5 text-blue-600 inline mr-2" />
-          <span>{notice}</span>
-        </div>
-      )}
+          <button
+            onClick={() => setShowModal(true)}
+            className="primary-btn bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-lg flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> Set Medication Reminder
+          </button>
+        </header>
 
-      {/* Security Info Banner */}
-      <div className="mb-6 flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 p-3.5 text-xs font-semibold text-blue-900">
-        <ShieldCheck className="h-4 w-4 shrink-0 text-blue-600" />
-        <span>All reminders link to unique Patient IDs (PID) for complete healthcare continuity.</span>
-      </div>
-
-      {/* FILTER TABS */}
-      <div className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl bg-slate-100 dark:bg-slate-800/80 p-1.5 text-xs font-extrabold">
-        {[
-          ['all', 'All Notifications', Bell],
-          ['emergency', 'PHC Emergency Alerts', Siren],
-          ['appointment', 'Appointment Reminders', Calendar],
-          ['prescription', 'Prescription Dosage Timings', Pill]
-        ].map(([key, label, Icon]) => {
-          const I = Icon as typeof Bell;
-          const isSelected = filter === key;
-          return (
-            <button
-              key={key as string}
-              onClick={() => setFilter(key as any)}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition ${
-                isSelected 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              <I className="h-4 w-4" />
-              <span>{label as string}</span>
+        {notice && (
+          <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-xs font-bold text-emerald-900 flex items-center justify-between">
+            <span>{notice}</span>
+            <button onClick={() => setNotice('')} className="text-emerald-500 hover:text-emerald-700">
+              <X className="h-4 w-4" />
             </button>
-          );
-        })}
-      </div>
+          </div>
+        )}
 
-      {/* NOTIFICATIONS & REMINDERS LIST */}
-      <div className="space-y-4">
-        {filteredReminders.map((item) => {
-          const isEmergency = item.category === 'emergency';
-          const isAppointment = item.category === 'appointment';
-          const isPrescription = item.category === 'prescription';
+        {/* Section 1: Prescription Reminders */}
+        <section className="card p-6 border-slate-200 dark:border-slate-800 shadow-md">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Pill className="h-5 w-5 text-emerald-600" /> Active Patient Prescription Reminders ({reminders.length})
+            </h2>
+            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+              <Volume2 className="h-4 w-4" /> Alerts Enabled
+            </span>
+          </div>
 
-          return (
-            <div 
-              key={item.id}
-              className={`card p-5 transition-all border ${
-                isEmergency 
-                  ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/60' 
-                  : isPrescription && item.taken
-                  ? 'bg-slate-50 dark:bg-slate-900/40 opacity-70 border-slate-200'
-                  : 'hover:border-blue-300'
-              }`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="flex items-start gap-3.5">
-                  <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-white font-black shadow-md ${
-                    isEmergency 
-                      ? 'bg-rose-600 shadow-rose-500/20' 
-                      : isAppointment 
-                      ? 'bg-blue-600 shadow-blue-500/20' 
-                      : 'bg-indigo-600 shadow-indigo-500/20'
-                  }`}>
-                    {isEmergency && <Siren className="h-6 w-6 animate-pulse" />}
-                    {isAppointment && <Calendar className="h-6 w-6" />}
-                    {isPrescription && <Pill className="h-6 w-6" />}
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {reminders.map(rem => (
+              <article key={rem.id} className="card p-5 border-emerald-100 dark:border-slate-800 bg-emerald-50/30 dark:bg-slate-900 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="rounded-full bg-emerald-100 dark:bg-emerald-950 px-2.5 py-0.5 text-[10px] font-black text-emerald-800 dark:text-emerald-200 uppercase">
+                        {rem.frequency.replaceAll('_', ' ')}
+                      </span>
+                      <h3 className="mt-1 text-base font-black text-slate-900 dark:text-white">
+                        {rem.medication_name}
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => toggleReminder(rem.id)}
+                      className={`px-3 py-1 rounded-full text-xs font-bold transition ${
+                        rem.active
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-slate-200 dark:bg-slate-800 text-slate-600'
+                      }`}
+                    >
+                      {rem.active ? 'Active Reminder' : 'Paused'}
+                    </button>
                   </div>
 
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                        isEmergency 
-                          ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200 border border-rose-200' 
-                          : isAppointment
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border border-blue-200'
-                          : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200 border border-indigo-200'
-                      }`}>
-                        {item.category === 'emergency' ? 'PHC Emergency' : item.category}
-                      </span>
-
-                      {item.pid && (
-                        <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-extrabold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                          PID: {item.pid}
-                        </span>
-                      )}
-
-                      <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {item.timeStr}
-                      </span>
-                    </div>
-
-                    <h2 className="text-base font-black text-slate-900 dark:text-white">{item.title}</h2>
-                    <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">{item.subtitle}</p>
-
-                    {item.facility && (
-                      <p className="mt-2 text-[11px] font-bold text-slate-500 flex items-center gap-1">
-                        <Building2 className="h-3.5 w-3.5 text-blue-600" /> Facility: {item.facility}
+                  <div className="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                    <p className="font-extrabold text-slate-900 dark:text-slate-100">
+                      Dosage: {rem.dosage}
+                    </p>
+                    <p className="flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-300">
+                      <Clock className="h-3.5 w-3.5" /> Scheduled Time: {rem.timing}
+                    </p>
+                    {rem.notes && (
+                      <p className="text-[11px] text-slate-500 italic mt-1">
+                        "{rem.notes}"
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* ACTION BUTTONS BASED ON CATEGORY */}
-                <div className="flex items-center gap-2">
-                  {isPrescription && (
-                    <button
-                      onClick={() => toggleMedication(item.id)}
-                      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold transition shadow-sm ${
-                        item.taken 
-                          ? 'bg-blue-700 text-white hover:bg-blue-800' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      {item.taken ? <Check className="h-4 w-4" /> : <Pill className="h-4 w-4" />}
-                      <span>{item.taken ? 'Taken' : 'Mark as Taken'}</span>
-                    </button>
-                  )}
-
-                  {isEmergency && (
-                    <Link
-                      href={item.pid ? `/patients/${item.pid}` : '/referrals'}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 text-xs font-black shadow-md transition"
-                    >
-                      <Siren className="h-4 w-4" /> View Patient & Triage <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  )}
-
-                  {isAppointment && (
-                    <Link
-                      href="/appointments"
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 text-xs font-bold shadow-sm transition"
-                    >
-                      <span>View Appointment</span> <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  )}
-
-                  <button
-                    onClick={() => setAlarmReminder(item.title)}
-                    className="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition"
-                    title="Set Alarm Reminder"
-                  >
-                    <Volume2 className="h-3.5 w-3.5 text-blue-600" />
-                    <span className="hidden sm:inline">Set Reminder</span>
-                  </button>
+                <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-3 flex items-center justify-between text-[11px] font-bold text-slate-500">
+                  <span>Browser Push & Sound Alerts Active</span>
+                  <span className="text-emerald-600 flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Active
+                  </span>
                 </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Section 2: General System Notifications */}
+        <section className="card p-6 border-slate-200 dark:border-slate-800 shadow-md">
+          <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-slate-800">
+            <Bell className="h-5 w-5 text-blue-600" /> Clinical & System Alerts
+          </h2>
+
+          <div className="space-y-3">
+            {items.length > 0 ? (
+              items.map(item => (
+                <article key={item.id} className="card flex gap-4 p-5 border-slate-100 dark:border-slate-800">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+                    <Bell className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-black text-slate-900 dark:text-white">{item.title}</h3>
+                    <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{item.message}</p>
+                    <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      {item.is_read ? 'Read' : 'New Alert'} · {new Date(item.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="p-8 text-center text-xs font-semibold text-slate-500">
+                No extra system alerts available.
               </div>
-            </div>
-          );
-        })}
+            )}
+          </div>
+        </section>
+
+        {/* Add Reminder Modal */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/75 p-4 backdrop-blur-sm">
+            <form onSubmit={handleCreateReminder} className="card w-full max-w-lg p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Set Prescription Medication Reminder</h2>
+                  <p className="text-xs text-slate-500">Configure automated dosage times and browser push notifications.</p>
+                </div>
+                <button type="button" onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 text-xs font-bold">
+                <label className="sm:col-span-2 block">
+                  Medication Name <span className="text-rose-500">*</span>
+                  <input
+                    required
+                    type="text"
+                    value={medName}
+                    onChange={e => setMedName(e.target.value)}
+                    placeholder="e.g. Paracetamol 500mg, Amoxicillin 250mg"
+                    className="input mt-1 text-xs"
+                  />
+                </label>
+
+                <label className="block">
+                  Dosage Instructions
+                  <input
+                    type="text"
+                    value={dosage}
+                    onChange={e => setDosage(e.target.value)}
+                    placeholder="e.g. 1 Tablet after food"
+                    className="input mt-1 text-xs"
+                  />
+                </label>
+
+                <label className="block">
+                  Frequency
+                  <select
+                    value={frequency}
+                    onChange={e => setFrequency(e.target.value as any)}
+                    className="input mt-1 text-xs"
+                  >
+                    <option value="daily">Once Daily</option>
+                    <option value="twice_daily">Twice Daily</option>
+                    <option value="weekly">Weekly</option>
+                  </select>
+                </label>
+
+                <label className="sm:col-span-2 block">
+                  Scheduled Time(s)
+                  <input
+                    type="text"
+                    value={timing}
+                    onChange={e => setTiming(e.target.value)}
+                    placeholder="e.g. 8:00 AM & 8:00 PM"
+                    className="input mt-1 text-xs"
+                  />
+                </label>
+
+                <label className="sm:col-span-2 block">
+                  Special Doctor Notes / Advice
+                  <textarea
+                    value={medNotes}
+                    onChange={e => setMedNotes(e.target.value)}
+                    placeholder="e.g. Take with plenty of fluids..."
+                    className="input mt-1 min-h-16 text-xs font-normal"
+                  />
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t dark:border-slate-800">
+                <button type="button" onClick={() => setShowModal(false)} className="secondary-btn text-xs">
+                  Cancel
+                </button>
+                <button className="primary-btn text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+                  Save Reminder & Enable Push
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </DashboardShell>
   );

@@ -55,10 +55,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   // 1. Initial Load from localStorage & Supabase
   useEffect(() => {
+    let localHasLang = false;
     try {
       const stored = localStorage.getItem('gramcare_settings');
       if (stored) {
-        setSettings(prev => ({ ...prev, ...JSON.parse(stored) }));
+        const parsed = JSON.parse(stored);
+        if (parsed.language) localHasLang = true;
+        setSettings(prev => ({ ...prev, ...parsed }));
       }
     } catch {
       // Fallback
@@ -73,15 +76,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (user) {
           const { data: pref } = await supabase.from('user_preferences').select('*').eq('user_id', user.id).single();
           if (pref) {
-            const fetched: Partial<SettingsState> = {
-              theme: (pref.theme as AppTheme) || 'light',
-              language: (pref.language as SupportedLanguage) || 'en',
-              fontSize: (pref.font_size as AppFontSize) || 'default',
-              highContrast: !!pref.high_contrast,
-              reducedMotion: !!pref.reduced_motion,
-              notificationPrefs: pref.notification_preferences || DEFAULT_SETTINGS.notificationPrefs
-            };
             setSettings(prev => {
+              const fetched: Partial<SettingsState> = {
+                theme: (pref.theme as AppTheme) || prev.theme,
+                language: localHasLang ? prev.language : ((pref.language as SupportedLanguage) || prev.language),
+                fontSize: (pref.font_size as AppFontSize) || prev.fontSize,
+                highContrast: pref.high_contrast !== undefined ? !!pref.high_contrast : prev.highContrast,
+                reducedMotion: pref.reduced_motion !== undefined ? !!pref.reduced_motion : prev.reducedMotion,
+                notificationPrefs: pref.notification_preferences || prev.notificationPrefs
+              };
               const updated = { ...prev, ...fetched };
               localStorage.setItem('gramcare_settings', JSON.stringify(updated));
               return updated;

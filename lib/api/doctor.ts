@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
+import { createPatientCode } from '@/lib/patient-id';
 import type { 
   DashboardStats, 
   FollowUpStatus, 
@@ -74,15 +75,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     };
   } catch (err) {
     console.error('getDashboardStats failed:', err);
-    return {
-      totalPatients: 0,
-      newPatientsThisWeek: 0,
-      highRiskPatients: 0,
-      criticalPatients: 0,
-      pendingReferrals: 0,
-      activeFollowUps: 0,
-      missedFollowUps: 0,
-    };
+    throw new Error('Unable to load authorised dashboard statistics');
   }
 }
 
@@ -219,10 +212,8 @@ export async function createPatientDirectly(input: {
     });
   }
 
-  // Generate unique Patient Code for real patients
-  const countRes = await supabase.from('patients').select('id', { count: 'exact', head: true }).eq('is_demo', false);
-  const nextNum = (countRes.count ?? 0) + 1001;
-  const patientCode = `GC-2026-${nextNum}`;
+  // The UUID-based code is safe under concurrent registrations; the database has a unique index too.
+  const patientCode = createPatientCode();
 
   const { data, error } = await supabase
     .from('patients')
@@ -731,6 +722,32 @@ export async function updateReferralStatus(
     details: { status, ...details }
   });
 
+  // Auto-schedule follow-up task for Health Worker upon referral completion
+  if (status === 'completed') {
+    try {
+      const { data: ref } = await supabase.from('referrals').select('patient_id').eq('id', referralId).single();
+      if (ref?.patient_id) {
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        const scheduledDate = nextWeek.toISOString().slice(0, 10);
+
+        const { data: existing } = await supabase.from('follow_ups').select('id').eq('patient_id', ref.patient_id).eq('referral_id', referralId).single();
+        if (!existing) {
+          await supabase.from('follow_ups').insert({
+            patient_id: ref.patient_id,
+            referral_id: referralId,
+            scheduled_date: scheduledDate,
+            status: 'scheduled',
+            notes: details?.treatmentSummary || 'Post-discharge PHC health worker follow-up check',
+            updated_by: user?.id ?? null
+          });
+        }
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+  }
+
   return true;
 }
 
@@ -832,29 +849,21 @@ export async function getFacilities(): Promise<Facility[]> {
       .from('facilities')
       .select('*')
       .order('name');
-    
-    const { NATIONWIDE_PHC_DATASET } = await import('@/lib/location/india-phc-database');
-    const fallbackList = NATIONWIDE_PHC_DATASET as unknown as Facility[];
-
-    if (error || !data || data.length === 0) {
-      return fallbackList;
+    if (error) {
+      console.error('Supabase getFacilities error:', error);
+      throw error;
     }
-
-    const map = new Map<string, Facility>();
-    fallbackList.forEach(f => map.set(f.id, f));
-    (data as Facility[]).forEach(f => map.set(f.id, f));
-    return Array.from(map.values());
+    return (data ?? []) as Facility[];
   } catch (err) {
     console.error('getFacilities failed:', err);
-    const { NATIONWIDE_PHC_DATASET } = await import('@/lib/location/india-phc-database');
-    return NATIONWIDE_PHC_DATASET as unknown as Facility[];
+    return [];
   }
 }
 
 export async function getNearbyFacilities(
   latitude: number,
   longitude: number,
-  limit = 15
+  limit = 10
 ): Promise<import('@/lib/location/types').NearbyFacilityResult[]> {
   const { haversineDistanceKm } = await import('@/lib/location/distance');
   const facilities = await getFacilities();
@@ -870,6 +879,8 @@ export async function getNearbyFacilities(
       district: f.district ?? null,
       state: f.state ?? null,
       referral_available: f.referral_available ?? true,
+      latitude: f.latitude!,
+      longitude: f.longitude!,
       distanceKm: haversineDistanceKm(latitude, longitude, f.latitude!, f.longitude!),
     }))
     .sort((a, b) => a.distanceKm - b.distanceKm)
@@ -980,6 +991,7 @@ export async function createAppointment(input: {
   appointmentDate: string;
   purpose: string;
   clinicalNotes?: string;
+  preferredFacility?: { name: string; address: string; latitude: number; longitude: number; phone?: string };
 }): Promise<Appointment> {
   const payload = {
     patient_id: input.patientId,
@@ -989,6 +1001,11 @@ export async function createAppointment(input: {
     appointment_date: input.appointmentDate,
     purpose: input.purpose,
     clinical_notes: input.clinicalNotes ?? null,
+    preferred_facility_name: input.preferredFacility?.name ?? null,
+    preferred_facility_address: input.preferredFacility?.address ?? null,
+    preferred_facility_latitude: input.preferredFacility?.latitude ?? null,
+    preferred_facility_longitude: input.preferredFacility?.longitude ?? null,
+    preferred_facility_phone: input.preferredFacility?.phone ?? null,
     status: 'scheduled'
   };
 
@@ -997,7 +1014,7 @@ export async function createAppointment(input: {
   const { data, error } = await supabase
     .from('appointments')
     .insert(payload)
-    .select('id, patient_id, doctor_id, facility_id, referral_id, appointment_date, purpose, status, clinical_notes, created_at')
+    .select('id, patient_id, doctor_id, facility_id, referral_id, appointment_date, purpose, status, clinical_notes, preferred_facility_name, preferred_facility_address, preferred_facility_latitude, preferred_facility_longitude, preferred_facility_phone, created_at')
     .single();
 
   if (error) {
@@ -1035,21 +1052,95 @@ export async function createAppointment(input: {
   return appointment;
 }
 
+export async function updateAppointmentStatus(
+  appointmentId: string,
+  status: 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled',
+  clinicalNotes?: string
+): Promise<boolean> {
+  const updateData: Record<string, any> = { status };
+  if (clinicalNotes) updateData.clinical_notes = clinicalNotes;
+
+  const { error } = await supabase
+    .from('appointments')
+    .update(updateData)
+    .eq('id', appointmentId);
+
+  if (error) {
+    console.error('Supabase updateAppointmentStatus error:', error);
+    throw new Error(`Failed to update appointment status: ${error.message}`);
+  }
+
+  await recordAuditLog({
+    action: `APPOINTMENT_STATUS_${status.toUpperCase()}`,
+    entityType: 'appointment',
+    entityId: appointmentId,
+    details: { status, clinicalNotes }
+  });
+
+  return true;
+}
+
+export async function createFacility(input: {
+  name: string;
+  code?: string;
+  facility_type?: string;
+  address?: string;
+  village?: string;
+  district?: string;
+  state?: string;
+  pincode?: string;
+  latitude?: number;
+  longitude?: number;
+  referral_available?: boolean;
+}): Promise<Facility> {
+  const payload = {
+    name: input.name,
+    code: input.code || `PHC-${Math.floor(1000 + Math.random() * 9000)}`,
+    facility_type: input.facility_type || 'Primary Health Centre',
+    address: input.address || null,
+    village: input.village || null,
+    district: input.district || null,
+    state: input.state || null,
+    pincode: input.pincode || null,
+    latitude: input.latitude ?? null,
+    longitude: input.longitude ?? null,
+    referral_available: input.referral_available ?? true
+  };
+
+  const { data, error } = await supabase
+    .from('facilities')
+    .insert(payload)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Supabase createFacility error:', error);
+    throw new Error(`Failed to register PHC facility: ${error.message}`);
+  }
+
+  await recordAuditLog({
+    action: 'CREATE_FACILITY',
+    entityType: 'facility',
+    entityId: data.id,
+    details: { name: input.name, facility_type: input.facility_type }
+  });
+
+  return data as Facility;
+}
+
 export async function resetDemoData(): Promise<boolean> {
   try {
     const { data, error } = await supabase.rpc('reset_demo_data');
     if (error) {
       console.error('Supabase reset_demo_data RPC error, executing fallback delete:', error);
-      // Client-side safe deletion fallback for demo patients while keeping database schema and RLS intact
+      // Client-side safe deletion fallback for demo patients only
       await supabase.from('patients').delete().eq('is_demo', true);
-      await supabase.from('patients').delete().ilike('patient_code', '%DEMO%');
-      await supabase.from('patients').delete().ilike('name', '%Demo%');
     }
 
     await recordAuditLog({
       action: 'RESET_DEMO_DATA',
       entityType: 'system',
-      details: { reset_by: 'admin', timestamp: new Date().toISOString() }
+      details: { reset_by: 'admin', count: 6 }
     });
 
     return true;

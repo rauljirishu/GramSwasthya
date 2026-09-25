@@ -82,7 +82,7 @@ export function LocationMap({
           lng += (Math.random() - 0.5) * 0.01;
         }
 
-        const iconColor = m.color === 'green' ? '#2563eb' : m.color === 'amber' ? '#f59e0b' : m.color === 'red' ? '#ef4444' : '#2563eb';
+        const iconColor = m.color === 'green' ? '#10b981' : m.color === 'amber' ? '#f59e0b' : m.color === 'red' ? '#ef4444' : '#2563eb';
         const marker = L.circleMarker([lat, lng], {
           radius: 8,
           fillColor: iconColor,

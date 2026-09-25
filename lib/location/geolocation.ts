@@ -16,19 +16,19 @@ export function mapGeolocationError(error: GeolocationPositionError): Geolocatio
 export function getGeolocationErrorMessage(code: GeolocationErrorCode): string {
   switch (code) {
     case 'PERMISSION_DENIED':
-      return 'Location permission was denied. You can select a nearby PHC manually.';
+      return 'Location permission was denied. You can enter the address manually.';
     case 'POSITION_UNAVAILABLE':
-      return 'Unable to detect your GPS location. Please select a nearby PHC manually.';
+      return 'Unable to detect your location. Please enter the address manually.';
     case 'TIMEOUT':
-      return 'Location detection timed out. Showing nearest PHCs based on default region.';
+      return 'Location detection timed out. Please try again or enter the address manually.';
     case 'OFFLINE':
-      return 'You are offline. GPS coordinates will be saved locally.';
+      return 'You are offline. GPS coordinates will be saved locally and synced when connection returns.';
     default:
-      return 'Unable to detect your location. Please select a nearby PHC manually.';
+      return 'Unable to detect your location. Please enter the address manually.';
   }
 }
 
-export function requestCurrentPosition(timeoutMs = 8000): Promise<GeolocationResult> {
+export function requestCurrentPosition(timeoutMs = 15000): Promise<GeolocationResult> {
   return new Promise((resolve, reject) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       reject({ code: 'POSITION_UNAVAILABLE' as GeolocationErrorCode });
@@ -40,7 +40,6 @@ export function requestCurrentPosition(timeoutMs = 8000): Promise<GeolocationRes
       return;
     }
 
-    // Try high accuracy first
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
@@ -49,30 +48,13 @@ export function requestCurrentPosition(timeoutMs = 8000): Promise<GeolocationRes
           accuracy: position.coords.accuracy,
         });
       },
-      (_err1) => {
-        // Fallback: try low accuracy (IP/Cell triangulation, works on Windows/macOS browsers)
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              accuracy: position.coords.accuracy,
-            });
-          },
-          (err2) => {
-            reject({ code: mapGeolocationError(err2) });
-          },
-          {
-            enableHighAccuracy: false,
-            timeout: timeoutMs,
-            maximumAge: 300000,
-          }
-        );
+      (error) => {
+        reject({ code: mapGeolocationError(error) });
       },
       {
         enableHighAccuracy: true,
-        timeout: Math.min(timeoutMs, 5000),
-        maximumAge: 120000,
+        timeout: timeoutMs,
+        maximumAge: 60000,
       }
     );
   });
@@ -88,12 +70,12 @@ export async function reverseGeocodeClient(
     );
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      return { ok: false, error: body.error || 'Reverse geocoding unavailable.' };
+      return { ok: false, error: body.error || 'Reverse geocoding unavailable. Please enter address manually.' };
     }
     const data = await res.json();
     return { ok: true, data };
   } catch {
-    return { ok: false, error: 'Reverse geocoding unavailable.' };
+    return { ok: false, error: 'Reverse geocoding unavailable. Please enter address manually.' };
   }
 }
 

@@ -40,7 +40,10 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+DATA_GOV_IN_API_KEY=<optional server-only data.gov.in API key for the national facility directory>
 ```
+
+The PHC finder combines GramCare facilities with coordinates and OpenStreetMap results for the selected area. If `DATA_GOV_IN_API_KEY` is configured, it also searches the Government of India National Hospital Directory by state and district. That directory reports facility coordinates and contact fields where available; it is updated periodically and does not guarantee live operating status. Without the key, manual location search and nearby public-map results remain available.
 
 ### 2. Database Migrations & Seed Data
 Execute the following SQL scripts in order in your **Supabase Dashboard → SQL Editor**:

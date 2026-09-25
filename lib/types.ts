@@ -96,7 +96,6 @@ export interface Patient extends SyncMetadata {
   womens_health?: WomensHealthInfo | null;
   child_health?: ChildHealthInfo | null;
   registered_by?: string;
-  verification_status?: string | null;
   created_at: string;
 }
 
@@ -296,6 +295,11 @@ export interface Appointment {
   patient_id: string;
   doctor_id?: string | null;
   facility_id?: string | null;
+  preferred_facility_name?: string | null;
+  preferred_facility_address?: string | null;
+  preferred_facility_latitude?: number | null;
+  preferred_facility_longitude?: number | null;
+  preferred_facility_phone?: string | null;
   referral_id?: string | null;
   appointment_date: string;
   purpose: string;

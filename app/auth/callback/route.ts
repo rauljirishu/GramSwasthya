@@ -10,17 +10,13 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
-      // Upsert profile in public.users using user_metadata provided at signup
+      // The database auth trigger creates a patient profile. Signup metadata is
+      // never trusted to assign privileged staff roles.
       const meta = data.user.user_metadata || {};
-      const role = meta.requested_role || 'asha';
-
-      await supabase.from('users').upsert({
-        id: data.user.id,
-        name: meta.name || 'Care Worker',
-        phone: meta.phone || '',
-        email: data.user.email,
-        role: role
-      }, { onConflict: 'id' });
+      await supabase.from('users').update({
+        name: meta.name || 'New patient',
+        email: data.user.email
+      }).eq('id', data.user.id);
 
       // Preferred UX: Redirect to login with verified notice
       return NextResponse.redirect(`${origin}/login?verified=true`);

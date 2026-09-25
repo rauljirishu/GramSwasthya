@@ -23,3 +23,12 @@ export function formatDistance(km: number): string {
   if (km < 10) return `${km.toFixed(1)} km`;
   return `${Math.round(km)} km`;
 }
+
+export type CoordinatePoint = { latitude: number; longitude: number };
+
+/** Attach true straight-line distances and return facilities nearest-first. */
+export function sortByDistance<T extends CoordinatePoint>(origin: CoordinatePoint, facilities: T[]) {
+  return facilities
+    .map(facility => ({ ...facility, distanceKm: haversineDistanceKm(origin.latitude, origin.longitude, facility.latitude, facility.longitude) }))
+    .sort((a, b) => a.distanceKm - b.distanceKm);
+}
