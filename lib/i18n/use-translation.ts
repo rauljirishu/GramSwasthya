@@ -1,16 +1,14 @@
 'use client';
 
 import { useSettings } from '@/lib/context/settings-context';
-import { translations } from './translations';
+import { getTranslation, SupportedLanguage } from './translations';
 
 export function useTranslation() {
-  const { language } = useSettings();
+  const { language, setLanguage } = useSettings();
 
-  const t = (key: string): string => {
-    const entry = translations[key];
-    if (!entry) return key;
-    return entry[language] || entry.en || key;
+  const t = (key: string, fallback?: string): string => {
+    return getTranslation(key, language as SupportedLanguage, fallback);
   };
 
-  return { t, language };
+  return { language, setLanguage, t };
 }

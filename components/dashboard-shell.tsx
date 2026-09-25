@@ -8,6 +8,7 @@ import { currentRole } from '@/lib/auth';
 import { supabase } from '@/lib/supabase/client';
 import { syncEngine } from '@/lib/offline/sync-engine';
 import { LanguageSelector } from '@/components/language-selector';
+import { useTranslation } from '@/lib/i18n/use-translation';
 import { 
   Bell, 
   Calendar, 
@@ -27,21 +28,22 @@ import {
   UserCheck
 } from 'lucide-react';
 
-const allNav = [
-  ['dashboard', 'Dashboard', LayoutDashboard, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
-  ['appointments', 'Appointments', Calendar, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
-  ['patients', 'Patients', Users, ['head', 'worker', 'doctor']],
-  ['referrals', 'Referrals', ClipboardList, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
-  ['follow-ups', 'Follow-ups', CalendarDays, ['head', 'worker', 'doctor', 'hospital', 'patient']],
-  ['maternal-care', 'Maternal Care', HeartPulse, ['head', 'worker', 'patient']],
-  ['health-education', 'Health Guidance', BookOpen, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
-  ['map', 'Nearby Care', Map, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
-  ['workers', 'Workers', Users, ['central', 'head']]
+const allNavKeys = [
+  ['dashboard', 'navDashboard', 'Dashboard', LayoutDashboard, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
+  ['appointments', 'navAppointments', 'Appointments', Calendar, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
+  ['patients', 'navPatients', 'Patients Directory', Users, ['head', 'worker', 'doctor']],
+  ['referrals', 'navReferrals', 'Inter-Facility Referrals', ClipboardList, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
+  ['follow-ups', 'navFollowUps', 'Follow-ups', CalendarDays, ['head', 'worker', 'doctor', 'hospital', 'patient']],
+  ['maternal-care', 'navMaternalCare', 'Maternal Care', HeartPulse, ['head', 'worker', 'patient']],
+  ['health-education', 'navHealthEducation', 'Health Guidance', BookOpen, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
+  ['map', 'navMap', 'Nearby Care', Map, ['central', 'head', 'worker', 'doctor', 'hospital', 'patient']],
+  ['workers', 'navWorkers', 'Workers', Users, ['central', 'head']]
 ] as const;
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [role, setRole] = useState<GramRole | null>(null);
   const [authenticating, setAuthenticating] = useState(true);
@@ -58,7 +60,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         setRole(found);
         setAuthenticating(false);
       } else {
-        // No authenticated session -> Redirect to login immediately
         router.replace('/login');
       }
     });
@@ -81,7 +82,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.replace('/login');
   }
 
-  // 1. Show loading shield screen if authentication is verifying
   if (authenticating || !role) {
     return (
       <div className="grid min-h-screen place-items-center bg-slate-950 p-4 text-white">
@@ -99,8 +99,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Filter navigation items strictly allowed for this authenticated user's database role
-  const nav = allNav.filter(x => (x[3] as readonly GramRole[]).includes(role));
+  const nav = allNavKeys.filter(x => (x[5] as readonly GramRole[]).includes(role));
 
   return (
     <div className="min-h-screen bg-[#f5f8fc] dark:bg-slate-950 text-slate-900 dark:text-slate-100 md:flex transition-colors">
@@ -122,9 +121,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             Gram<span className="text-blue-400">Care</span>
           </span>
         </Link>
-        <p className="mt-2 text-xs font-semibold text-slate-400">Connected Healthcare for Rural Communities</p>
+        <p className="mt-2 text-xs font-semibold text-slate-400">
+          {t('appTagline', 'Connected Healthcare for Rural Communities')}
+        </p>
 
-        {/* Read-Only Authenticated Role Badge (No switching allowed without logging in!) */}
         <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 text-xs">
           <span className="flex items-center gap-2 font-black text-blue-300">
             <UserCheck className="h-4 w-4 text-blue-400" />
@@ -137,7 +137,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         {/* Navigation Items */}
         <nav className="mt-6 space-y-1 overflow-y-auto">
-          {nav.map(([href, label, Icon]) => (
+          {nav.map(([href, navKey, defaultLabel, Icon]) => (
             <Link
               onClick={() => setOpen(false)}
               key={href}
@@ -148,8 +148,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   : 'text-slate-300 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <Icon className="h-4 w-4" />
-              <span>{label}</span>
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{t(navKey, defaultLabel)}</span>
             </Link>
           ))}
         </nav>
@@ -160,7 +160,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           className="mt-auto flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-300 hover:bg-rose-500/20 hover:text-rose-200 transition"
         >
           <LogOut className="h-4 w-4 text-rose-400" />
-          <span>Sign Out</span>
+          <span>{t('navSignOut', 'Sign Out')}</span>
         </button>
       </aside>
 
@@ -191,14 +191,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span>{pending ? ` · Pending sync: ${pending}` : ' · All records synchronized'}</span>
           </div>
 
-          {/* Read-Only Authenticated User Badge, Language Selector & Notifications */}
+          {/* Language Selector & Actions */}
           <div className="ml-auto flex items-center gap-3">
             <LanguageSelector />
 
             <Link
               href="/notifications"
               className="relative rounded-xl border border-slate-200 dark:border-slate-700 p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-              title="Reminders & Notifications"
+              title={t('navNotifications', 'Reminders & Notifications')}
             >
               <Bell className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <span className="absolute -top-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-rose-600 text-[9px] font-black text-white">
@@ -206,7 +206,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </span>
             </Link>
 
-            {/* READ-ONLY ROLE BADGE */}
             <div className="flex items-center gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 px-3 py-1.5 border border-blue-200 dark:border-blue-800">
               <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <span className="text-xs font-extrabold text-blue-900 dark:text-blue-200">
@@ -219,7 +218,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600 dark:hover:text-rose-300 transition"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span>Sign Out</span>
+              <span>{t('navSignOut', 'Sign Out')}</span>
             </button>
           </div>
         </header>

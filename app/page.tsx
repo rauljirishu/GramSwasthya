@@ -19,19 +19,21 @@ import {
 import { ContinueDashboard } from '@/components/continue-dashboard';
 import { BookAppointmentModal } from '@/components/book-appointment-modal';
 import { LanguageSelector } from '@/components/language-selector';
-
-const capabilities = [
-  [ShieldCheck, 'Patient Records & Unique PID', 'Longitudinal health information with unique PID identifiers and role-based access.'],
-  [Calendar, 'Book Clinical Appointments', 'Schedule consultations with doctors and PHC specialists stored securely in the database.'],
-  [Cloud, 'Offline-First Data Entry', 'Securely queue field records and synchronize when connectivity returns.'],
-  [HeartPulse, 'AI-Assisted Risk Screening', 'Clinical decision support and risk indicators for authorised review.'],
-  [Users, 'Digital Referrals', 'Coordinate care between PHCs, doctors and hospitals.'],
-  [MapPin, 'Nearby Healthcare Services', 'Use device location or a manual location to find care.']
-];
+import { useTranslation } from '@/lib/i18n/use-translation';
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [notice, setNotice] = useState('');
+  const { t } = useTranslation();
+
+  const capabilities = [
+    [ShieldCheck, t('cap1Title', 'Patient Records & Unique PID'), t('cap1Desc', 'Longitudinal health information with unique PID identifiers and role-based access.')],
+    [Calendar, t('cap2Title', 'Book Clinical Appointments'), t('cap2Desc', 'Schedule consultations with doctors and PHC specialists stored securely in the database.')],
+    [Cloud, t('cap3Title', 'Offline-First Data Entry'), t('cap3Desc', 'Securely queue field records and synchronize when connectivity returns.')],
+    [HeartPulse, t('cap4Title', 'AI-Assisted Risk Screening'), t('cap4Desc', 'Clinical decision support and risk indicators for authorised review.')],
+    [Users, t('cap5Title', 'Digital Referrals'), t('cap5Desc', 'Coordinate care between PHCs, doctors and hospitals.')],
+    [MapPin, t('cap6Title', 'Nearby Healthcare Services'), t('cap6Desc', 'Use device location or a manual location to find care.')]
+  ];
 
   return (
     <main className="min-h-screen bg-[#f5f8fc] dark:bg-slate-950 transition-colors">
@@ -42,15 +44,16 @@ export default function Home() {
           GramCare
         </div>
         <div className="flex items-center gap-2">
+          <LanguageSelector />
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] px-4 py-2.5 text-sm font-extrabold text-white shadow-md transition-all"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] px-4 py-2.5 text-sm font-extrabold text-white shadow-md transition-all"
           >
             <Calendar className="h-4 w-4" />
-            <span>Book Appointment</span>
+            <span>{t('bookAppointmentBtn', 'Book Appointment')}</span>
           </button>
-          <Link href="/login" className="secondary-btn py-2.5 text-sm">Sign in</Link>
-          <Link href="/signup" className="primary-btn py-2.5 text-sm">Create account</Link>
+          <Link href="/login" className="secondary-btn py-2.5 text-sm">{t('signInBtn', 'Sign in')}</Link>
+          <Link href="/signup" className="primary-btn py-2.5 text-sm">{t('createAccountBtn', 'Create account')}</Link>
         </div>
       </header>
 
@@ -58,13 +61,13 @@ export default function Home() {
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-12 lg:grid-cols-2 lg:py-16">
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-950/60 px-3.5 py-1.5 text-xs font-bold text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-            <ShieldCheck className="h-3.5 w-3.5 text-blue-600" /> Connected Healthcare for Rural Communities
+            <ShieldCheck className="h-3.5 w-3.5 text-blue-600" /> {t('appTagline', 'Connected Healthcare for Rural Communities')}
           </span>
           <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-slate-900 dark:text-white sm:text-6xl">
-            Care continuity from village to hospital.
+            {t('heroTitle', 'Care continuity from village to hospital.')}
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-            GramCare connects rural health workers, PHCs, doctors and hospitals through secure digital healthcare workflows, unique Patient IDs (PID), and instant appointment scheduling.
+            {t('heroDesc', 'GramCare connects rural health workers, PHCs, doctors and hospitals through secure digital healthcare workflows, unique Patient IDs (PID), and instant appointment scheduling.')}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -73,10 +76,10 @@ export default function Home() {
               className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] px-6 py-3.5 text-base font-extrabold text-white shadow-lg shadow-blue-500/25 transition-all"
             >
               <Calendar className="h-5 w-5" />
-              <span>Book Appointment</span>
+              <span>{t('bookAppointmentBtn', 'Book Appointment')}</span>
             </button>
             <Link href="/appointments" className="secondary-btn py-3.5">
-              <span>View Appointments</span> <ArrowRight className="h-4 w-4" />
+              <span>{t('navAppointments', 'View Appointments')}</span> <ArrowRight className="h-4 w-4" />
             </Link>
             <ContinueDashboard />
           </div>
@@ -89,11 +92,11 @@ export default function Home() {
           )}
 
           <p className="mt-5 text-sm font-semibold text-slate-500">
-            Patient information is accessible only to authorised users with unique PID tracking.
+            {t('privacyNotice', 'Patient information is accessible only to authorised users with unique PID tracking.')}
           </p>
         </div>
 
-        {/* PROMINENT BLUE BOOK APPOINTMENT CARD (User Requested Blue Box on Front Page) */}
+        {/* BLUE BOOK APPOINTMENT CARD */}
         <div className="card bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-7 text-white shadow-xl shadow-blue-600/20 border-0 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
@@ -140,7 +143,7 @@ export default function Home() {
               onClick={() => setIsModalOpen(true)}
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-black text-blue-900 shadow-md hover:bg-blue-50 active:scale-[0.98] transition"
             >
-              <Plus className="h-4 w-4 text-blue-700" /> Book Appointment Now
+              <Plus className="h-4 w-4 text-blue-700" /> {t('bookAppointmentBtn', 'Book Appointment Now')}
             </button>
             <Link
               href="/appointments"

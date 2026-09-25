@@ -1,84 +1,140 @@
-export type SupportedLanguage = 'en' | 'hi' | 'gu' | 'mr';
+export type SupportedLanguage = 
+  | 'en' | 'hi' | 'gu' | 'mr' | 'bn' | 'ta' | 'te' 
+  | 'kn' | 'ml' | 'pa' | 'or' | 'as' | 'ur' | 'sa';
+
+export interface LanguageOption {
+  code: SupportedLanguage;
+  label: string;
+  nativeName: string;
+}
+
+export const SUPPORTED_LANGUAGES: LanguageOption[] = [
+  { code: 'en', label: 'EN', nativeName: 'English' },
+  { code: 'hi', label: 'HI', nativeName: 'हिन्दी (Hindi)' },
+  { code: 'gu', label: 'GU', nativeName: 'ગુજરાતી (Gujarati)' },
+  { code: 'mr', label: 'MR', nativeName: 'मराठी (Marathi)' },
+  { code: 'bn', label: 'BN', nativeName: 'বাংলা (Bengali)' },
+  { code: 'ta', label: 'TA', nativeName: 'தமிழ் (Tamil)' },
+  { code: 'te', label: 'TE', nativeName: 'తెలుగు (Telugu)' },
+  { code: 'kn', label: 'KN', nativeName: 'ಕನ್ನಡ (Kannada)' },
+  { code: 'ml', label: 'ML', nativeName: 'മലയാളം (Malayalam)' },
+  { code: 'pa', label: 'PA', nativeName: 'ਪੰਜਾਬੀ (Punjabi)' },
+  { code: 'or', label: 'OR', nativeName: 'ଓଡ଼ିଆ (Odia)' },
+  { code: 'as', label: 'AS', nativeName: 'অসমীয়া (Assamese)' },
+  { code: 'ur', label: 'UR', nativeName: 'اردو (Urdu)' },
+  { code: 'sa', label: 'SA', nativeName: 'संस्कृतम् (Sanskrit)' }
+];
 
 export interface TranslationDictionary {
-  [key: string]: {
-    en: string;
-    hi: string;
-    gu: string;
-    mr: string;
-  };
+  [key: string]: Partial<Record<SupportedLanguage, string>>;
 }
 
 export const translations: TranslationDictionary = {
-  // Brand & Shell
-  appName: { en: 'GramCare', hi: 'ग्रामकेयर', gu: 'ગ્રામકેર', mr: 'ग्रामकेअर' },
-  appTagline: { en: 'Connected Healthcare for Rural Communities', hi: 'ग्रामीण समुदायों के लिए कनेक्टेड स्वास्थ्य सेवा', gu: 'ગ્રામીણ સમુદાયો માટે કનેક્ટેડ હેલ્થકેર', mr: 'ग्रामीण समुदायांसाठी कनेक्टेड आरोग्य सेवा' },
-  centralAuthority: { en: 'Central Authority', hi: 'केंद्रीय प्राधिकरण', gu: 'સેન્ટ્રલ ઓથોરિટી', mr: 'केंद्रीय प्राधिकरण' },
-  phcHead: { en: 'PHC Head', hi: 'पीएचसी प्रमुख', gu: 'પીએચસી વડા', mr: 'पीएचसी प्रमुख' },
-  phcWorker: { en: 'PHC Worker / ASHA', hi: 'पीएचसी कार्यकर्ता / आशा', gu: 'પીએચસી કાર્યકર / આશા', mr: 'पीएचसी कार्यकर्ता / आशा' },
-  patientUser: { en: 'Patient', hi: 'मरीज़', gu: 'દર્દી', mr: 'रुग्ण' },
+  // App Brand & Navigation
+  appName: {
+    en: "GramCare", hi: "ग्रामकेयर", gu: "ગ્રામકેર", mr: "ग्रामकेअर",
+    bn: "গ্রামকেয়ার", ta: "கிராம்கேர்", te: "గ్రామ్‌కేర్", kn: "ಗ್ರಾಮ್‌ಕೇರ್",
+    ml: "ഗ്രാംകെയർ", pa: "ਗ੍ਰਾਮਕੇਅਰ", or: "ଗ୍ରାମକେୟାର", as: "গ্ৰামকেয়াৰ",
+    ur: "گرام کیئر", sa: "ग्रामकेयरम्"
+  },
+  appTagline: {
+    en: "Connected Healthcare for Rural Communities",
+    hi: "ग्रामीण समुदायों के लिए कनेक्टेड स्वास्थ्य सेवा",
+    gu: "ગ્રામીણ સમુદાયો માટે કનેક્ટેડ હેલ્થકેર",
+    mr: "ग्रामीण समुदायांसाठी कनेक्टेड आरोग्य सेवा",
+    bn: "গ্রামীণ সম্প্রদায়ের জন্য কানেক্টেড স্বাস্থ্যসেবা",
+    ta: "கிராமப்புற சமூகங்களுக்கான சுகாதார சேவை",
+    te: "గ్రామీణ వర్గాల కోసం కనెక్టెడ్ ఆరోగ్య సేవలు",
+    kn: "ಮೀಸಲಾದ ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಸೇವೆ",
+    ml: "ഗ്രാമീണ മേഖലകൾക്കുള്ള ആരോഗ്യ സേവനം",
+    pa: "ਗ੍ਰਾਮੀਣ ਖੇਤਰਾਂ ਲਈ ਜੁੜੀ ਹੋਈ ਸਿਹਤ ਸੰਭਾਲ",
+    or: "ଗ୍ରାମୀଣ ଅଞ୍ଚଳ ପାଇଁ ଆରୋଗ୍ୟ ସେବା",
+    as: "গ্ৰামীণ ৰাইজৰ বাবে উন্নত স্বাস্থ্যসেৱা",
+    ur: "دیہی علاقوں کے لیے جدید دیکھ بھال",
+    sa: "ग्रामीणक्षेत्रेभ्यः निरन्तरस्वास्थ्यसेवा"
+  },
+  centralAuthority: {
+    en: "Central Authority", hi: "केंद्रीय प्राधिकरण", gu: "સેન્ટ્રલ ઓથોરિટી", mr: "केंद्रीय प्राधिकरण",
+    bn: "কেন্দ্রীয় কর্তৃপক্ষ", ta: "மத்திய அதிகாரம்", te: "కేంద్ర అధికారం", kn: "ಕೇಂದ್ರೀಯ ಪ್ರಾಧಿಕಾರ",
+    ml: "കേന്ദ്ര അതോറിറ്റി", pa: "ਕੇਂਦਰੀ ਅਥਾਰਟੀ", or: "କେନ୍ଦ୍ରୀୟ ପ୍ରାଧିକରଣ", as: "কেন্দ্ৰীয় কৰ্তৃপক্ষ",
+    ur: "مرکزی اتھارٹی", sa: "केंद्रीयप्राधिकरणम्"
+  },
+  phcHead: {
+    en: "PHC Head", hi: "पीएचसी प्रमुख", gu: "પીએચસી વડા", mr: "पीएचसी प्रमुख",
+    bn: "পিএইচসি প্রধান", ta: "பிஎச்சி தலைவர்", te: "పిహెచ్‌సి హెడ్", kn: "ಪಿಎಚ್‌ಸಿ ಮುಖ್ಯಸ್ಥ",
+    ml: "പിഎച്ച്സി മേധാവി", pa: "ਪੀਐਚਸੀ ਮੁਖੀ", or: "ପିଏଚସି ମୁଖ୍ୟ", as: "পিএইচচি মূৰব্বী",
+    ur: "پی ایچ سی سربراہ", sa: "पीएचसीप्रमुखः"
+  },
+  phcWorker: {
+    en: "PHC Worker / ASHA", hi: "पीएचसी कार्यकर्ता / आशा", gu: "પીએચસી કાર્યકર / આશા", mr: "पीएचसी कार्यकर्ता / आशा",
+    bn: "পিএইচসি কর্মী / আশা", ta: "பிஎச்சி பணியாளர் / ஆஷா", te: "పిహెచ్‌సి వర్కర్ / ఆశా", kn: "ಪಿಎಚ್‌ಸಿ ಕಾರ್ಯಕರ್ತ / ಆಶಾ",
+    ml: "പിഎച്ച്സി വർക്കർ / ആശാ", pa: "ਪੀਐਚਸੀ ਵਰਕਰ / ਆਸ਼ਾ", or: "ପିଏଚସି କର୍ମୀ / ଆଶା", as: "পিএইচচি কৰ্মী / আশা",
+    ur: "پی ایچ سی ورکر / آشا", sa: "पीएचसीकार्यकर्ता / आशा"
+  },
+  patientUser: {
+    en: "Patient", hi: "मरीज़", gu: "દર્દી", mr: "रुग्ण",
+    bn: "রোগী", ta: "நோயாளி", te: "రోగి", kn: "ರೋಗಿ",
+    ml: "രോഗി", pa: "ਮਰੀਜ਼", or: "ରୋଗୀ", as: "ৰোগী",
+    ur: "مریض", sa: "रोगी"
+  },
 
-  // Navigation Items
-  navDashboard: { en: 'Dashboard', hi: 'डैशबोर्ड', gu: 'ડેશબોર્ડ', mr: 'डॅशबोर्ड' },
-  navAppointments: { en: 'Appointments', hi: 'अपॉइंटमेंट', gu: 'એપોઇન્ટમેન્ટ્સ', mr: 'अपॉइंटमेंट्स' },
-  navPatients: { en: 'Patients Directory', hi: 'मरीज़ सूची', gu: 'દર્દીઓની યાદી', mr: 'रुग्ण डिरेक्टरी' },
-  navReferrals: { en: 'Inter-Facility Referrals', hi: 'इंटर-फैसिलिटी रेफरल', gu: 'ઇન્ટર-ફેસિલીટી રેફરલ', mr: 'इंटर-फॅसिलिटी रेफरल्स' },
-  navFollowUps: { en: 'Follow-ups', hi: 'फॉलो-अप', gu: 'ફોલો-અપ્સ', mr: 'फॉलो-अप्स' },
-  navMaternalCare: { en: 'Maternal Care', hi: 'मातृ देखभाल', gu: 'માતૃ સંભાળ', mr: 'माता काळजी' },
-  navHealthEducation: { en: 'Health Guidance', hi: 'स्वास्थ्य मार्गदर्शन', gu: 'આરોગ્ય માર્ગદર્શન', mr: 'आरोग्य मार्गदर्शन' },
-  navMap: { en: 'Nearby Care Map', hi: 'निकटतम स्वास्थ्य केंद्र नक्शा', gu: 'નજીકના આરોગ્ય કેન્દ્રો', mr: 'जवळपासची आरोग्य केंद्रे' },
-  navWorkers: { en: 'Worker Management', hi: 'कार्यकर्ता प्रबंधन', gu: 'કાર્યકર સંચાલન', mr: 'कार्यकर्ते व्यवस्थापन' },
-  navNotifications: { en: 'Reminders & Notifications', hi: 'रिमाइंडर और सूचनाएं', gu: 'રિમાઇન્ડર્સ અને સૂચનાઓ', mr: 'रिमाइंडर्स आणि सूचना' },
-  navSignOut: { en: 'Sign Out', hi: 'लॉग आउट', gu: 'સાઇન આઉટ', mr: 'साइन आउट' },
+  // Nav Items
+  navDashboard: { en: "Dashboard", hi: "डैशबोर्ड", gu: "ડેશબોર્ડ", mr: "डॅशबोर्ड", bn: "ড্যাশবোর্ড", ta: "டாஷ்போர்டு", te: "డాష్‌బోర్డ్", kn: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", ml: "ഡാഷ്‌ബോർഡ്", pa: "ਡੈਸ਼ਬੋਰਡ", or: "ଡ୍ୟାସବୋର୍ଡ", as: "ড্যাশবৰ্ড", ur: "ڈیش بورڈ", sa: "फलकम्" },
+  navAppointments: { en: "Appointments", hi: "अपॉइंटमेंट", gu: "એપોઇન્ટમેન્ટ્સ", mr: "अपॉइंटमेंट्स", bn: "অ্যাপয়েন্টমেন্ট", ta: "சந்திப்புகள்", te: "అపాయింట్‌మెంట్లు", kn: "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಳು", ml: "അപ്പോയിന്റ്മെന്റുകൾ", pa: "ਮੀਟਿੰਗਾਂ", or: "ଆପଏଣ୍ଟମେଣ୍ଟ", as: "অ্যাপইণ্টমেণ্ট", ur: "ملاقاتیں", sa: "नियुक्तयः" },
+  navPatients: { en: "Patients Directory", hi: "मरीज़ सूची", gu: "દર્દીઓની યાદી", mr: "रुग्ण डिरेक्टरी", bn: "রোগীদের তালিকা", ta: "நோயாளிகள் பட்டியல்", te: "రోగుల డైరెక్టరీ", kn: "ರೋಗಿಗಳ ಡೈರೆಕ್ಟರಿ", ml: "രോഗികളുടെ ഡയറക്ടറി", pa: "ਮਰੀਜ਼ਾਂ ਦੀ ਸੂਚੀ", or: "ରୋଗୀ ତାଲିକା", as: "ৰোগীৰ তালিকা", ur: "مریضوں کی فہرست", sa: "रोगीसूची" },
+  navReferrals: { en: "Inter-Facility Referrals", hi: "इंटर-फैसिलिटी रेफरल", gu: "ઇન્ટર-ફેસિલીટી રેફરલ", mr: "इंटर-फॅसिलिटी रेफरल्स", bn: "ইন্টার-ফ্যাসিলিটি রেফারেল", ta: "மையங்களுக்கு இடையேயான பரிந்துரை", te: "అంతర్-సౌకర్య సూచనలు", kn: "ಸೌಲಭ್ಯಗಳ ನಡುವಿನ ಉಲ್ಲೇಖಗಳು", ml: "റെഫറലുകൾ", pa: "ਰੈਫਰਲ", or: "ରେଫରାଲ", as: "ৰেফাৰেল", ur: "ریفرلز", sa: "प्रेषणसूची" },
+  navFollowUps: { en: "Follow-ups", hi: "फॉलो-अप", gu: "ફોલો-અપ્સ", mr: "फॉलो-अप्स", bn: "ফলো-আপ", ta: "தொடர் கண்காணிப்பு", te: "ఫాలో-అప్‌లు", kn: "ಫಾಲೋ-ಅಪ್‌ಗಳು", ml: "ഫോളോ-അപ്പുകൾ", pa: "ਫਾਲੋ-ਅਪ", or: "ଫଲୋ-ଅପ୍", as: "ফলো-আপ", ur: "فالو اپ", sa: "अनुवर्तनम्" },
+  navNotifications: { en: "Reminders & Notifications", hi: "रिमाइंडर और सूचनाएं", gu: "રિમાઇન્ડર્સ અને સૂચનાઓ", mr: "रिमाइंडर्स आणि सूचना", bn: "স্মারক ও বিজ্ঞপ্তি", ta: "நினைவூட்டல்கள் & அறிவிப்புகள்", te: "గుర్తుచేసేవి & ప్రకటనలు", kn: "ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಸೂಚನೆಗಳು", ml: "അറിയിപ്പുകൾ", pa: "ਯਾਦ-ਦਹਾਨੀਆਂ", or: "ସୂଚନା", as: "জাননী", ur: "اطلاعات", sa: "सूचनाः" },
+  navSignOut: { en: "Sign Out", hi: "लॉग आउट", gu: "સાઇન આઉટ", mr: "साइन आउट", bn: "সাইন আউট", ta: "வெளியேறு", te: "సైన్ అవుట్", kn: "ಸೈನ್ ಔಟ್", ml: "സൈൻ ഔട്ട്", pa: "ਸਾਈਨ ਆਊਟ", or: "ସାଇନ୍ ଆଉଟ୍", as: "ছাইন আউট", ur: "سائن آؤٹ", sa: "निर्गमनम्" },
 
-  // Dashboard Headings & Metric Labels
-  dashboardTitle: { en: 'Connected care for every village.', hi: 'हर गाँव के लिए कनेक्टेड देखभाल।', gu: 'દરેક ગામ માટે કનેક્ટેડ સંભાળ.', mr: 'प्रत्येक गावासाठी जोडलेली काळजी.' },
-  dashboardDesc: { en: 'GramCare supports secure healthcare continuity from field registration through clinical review, appointment booking, referral, treatment and follow-up.', hi: 'ग्रामकेयर क्षेत्र पंजीकरण से लेकर नैदानिक समीक्षा, अपॉइंटमेंट बुकिंग, रेफरल, उपचार और फॉलो-अप तक सुरक्षित स्वास्थ्य सेवा की निरंतरता का समर्थन करता है।', gu: 'ગ્રામકેર ક્ષેત્ર સંગ્રહથી લઇ ક્લિનિકલ સમીક્ષા, એપોઇન્ટમેન્ટ બુકિંગ, રેફરલ, ઉપચાર અને ફોલો-અપ સુધી સુરક્ષિત આરોગ્યસંભાળની નિરંતરતાને સપોર્ટ કરે છે.', mr: 'ग्रामकेअर क्षेत्र नोंदणीपासून क्लिनिकल पुनरावलोकन, अपॉइंटमेंट बुकिंग, संदर्भ, उपचार आणि फॉलो-अप पर्यंत सुरक्षित आरोग्य सेवा सलगतेला पाठिंबा देते.' },
-  bookAppointmentBtn: { en: 'Book Appointment', hi: 'अपॉइंटमेंट बुक करें', gu: 'એપોઇન્ટમેન્ટ બુક કરો', mr: 'अपॉइंटमेंट बुक करा' },
-  bookAppointmentNoLogin: { en: 'Book Appointment (No Login)', hi: 'अपॉइंटमेंट बुक करें (बिना लॉगिन)', gu: 'એપોઇન્ટમેન્ટ બુક કરો (વગર લોગિન)', mr: 'अपॉइंटमेंट बुक करा (लॉगिनशिवाय)' },
-  createAccountBtn: { en: 'Create Account', hi: 'खाता बनाएं', gu: 'ખાતું બનાવો', mr: 'खाते तयार करा' },
-  signInBtn: { en: 'Sign In', hi: 'साइन इन करें', gu: 'સાઇન ઇન', mr: 'साइन इन करा' },
-
+  // Buttons & Controls
+  bookAppointmentBtn: { en: "Book Appointment", hi: "अपॉइंटमेंट बुक करें", gu: "એપોઇન્ટમેન્ટ બુક કરો", mr: "अपॉइंटमेंट बुक करा", bn: "অ্যাপয়েন্টমেন্ট বুক করুন", ta: "சந்திப்பு பதிவு செய்க", te: "అపాయింట్‌మెంట్ బుక్ చేయండి", kn: "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ", ml: "അപ്പോയിന്റ്മെന്റ് ബുക്ക് ചെയ്യുക", pa: "ਮੀਟਿੰਗ ਬੁੱਕ ਕਰੋ", or: "ଆପଏଣ୍ଟମେଣ୍ଟ ବୁକ୍ କରନ୍ତୁ", as: "বুকিং কৰক", ur: "ملاقات بک کریں", sa: "नियुक्तिं करोतु" },
+  bookAppointmentNoLogin: { en: "Book Appointment (No Login)", hi: "अपॉइंटमेंट बुक करें (बिना लॉगिन)", gu: "એપોઇન્ટમેન્ટ બુક કરો (વગર લોગિન)", mr: "अपॉइंटमेंट बुक करा (लॉगिनशिवाय)", bn: "লগইন ছাড়াই বুক করুন", ta: "உள்நுழைவு இன்றி பதிவு செய்க", te: "లాగిన్ లేకుండా బుకింగ్", kn: "ಲಾಗಿನ್ ಇಲ್ಲದೆ ಬುಕ್ ಮಾಡಿ", ml: "ലോഗിൻ ഇല്ലാതെ ബുക്ക് ചെയ്യുക", pa: "ਬਿਨਾਂ ਲੌਗਇਨ ਬੁੱਕ ਕਰੋ", or: "ବିନା ଲଗଇନ୍ ବୁକ୍", as: "লগইন নোহোৱাকৈ বুকিং", ur: "بغیر لاگ ان بک کریں", sa: "प्रवेशं विना नियुक्तिः" },
+  createAccountBtn: { en: "Create Account", hi: "खाता बनाएं", gu: "ખાતું બનાવો", mr: "खाते तयार करा", bn: "অ্যাকাউন্ট তৈরি করুন", ta: "கணக்கு உருவாக்கு", te: "ఖాతా సృష్టించండి", kn: "ಖಾತೆ ರಚಿಸಿ", ml: "അക്കൗണ്ട് ഉണ്ടാക്കുക", pa: "ਖਾਤਾ ਬਣਾਓ", or: "ଖାତା ଖୋଲନ୍ତୁ", as: "একাউণ্ট খোলক", ur: "اکاؤنٹ بنائیں", sa: "खातां सृजतु" },
+  signInBtn: { en: "Sign In", hi: "साइन इन करें", gu: "સાઇન ઇન", mr: "साइन इन करा", bn: "সাইন ইন করুন", ta: "உள்நுழை", te: "సైన్ ఇన్ చేయండి", kn: "ಸೈನ್ ಇನ್", ml: "ലോഗിൻ ചെയ്യുക", pa: "ਸਾਈਨ ਇਨ", or: "ସାଇନ୍ ଇନ୍", as: "ছাইন ইন", ur: "سائن ان", sa: "प्रवेशं करोतु" },
+  
   // AI Risk Triage Levels
-  riskLow: { en: 'Low Risk 🟢', hi: 'कम जोखिम 🟢 (Low)', gu: 'ઓછું જોખમ 🟢 (Low)', mr: 'कमी धोका 🟢 (Low)' },
-  riskMedium: { en: 'Medium Risk 🟡', hi: 'मध्यम जोखिम 🟡 (Medium)', gu: 'મધ્યમ જોખમ 🟡 (Medium)', mr: 'मध्यम धोका 🟡 (Medium)' },
-  riskHigh: { en: 'High Risk 🔴', hi: 'उच्च जोखिम 🔴 (High)', gu: 'ઉચ્ચ જોખમ 🔴 (High)', mr: 'उच्च धोका 🔴 (High)' },
-  riskCritical: { en: 'Critical Escalation 🔴', hi: 'अत्यंत गंभीर 🔴 (Critical)', gu: 'અત્યંત ગંભીર 🔴 (Critical)', mr: 'अत्यंत गंभीर 🔴 (Critical)' },
+  riskLow: { en: "Low Risk 🟢", hi: "कम जोखिम 🟢 (Low)", gu: "ઓછું જોખમ 🟢 (Low)", mr: "कमी धोका 🟢 (Low)", bn: "কম ঝুঁকি 🟢", ta: "குறைந்த அபாயம் 🟢", te: "తక్కువ ప్రమాదం 🟢", kn: "ಕಡಿಮೆ ಅಪಾಯ 🟢", ml: "കുറഞ്ഞ സാധ്യത 🟢", pa: "ਘੱਟ ਖਤਰਾ 🟢", or: "କମ୍ ବିପଦ 🟢", as: "কম বিপন্নতা 🟢", ur: "کم خطرہ 🟢", sa: "न्यूनसङ्कटम् 🟢" },
+  riskMedium: { en: "Medium Risk 🟡", hi: "मध्यम जोखिम 🟡 (Medium)", gu: "મધ્યમ જોખમ 🟡 (Medium)", mr: "मध्यम धोका 🟡 (Medium)", bn: "মাঝারি ঝুঁকি 🟡", ta: "மிதமான அபாயம் 🟡", te: "మధ్యస్థ ప్రమాదం 🟡", kn: "ಮಧ್ಯಮ ಅಪಾಯ 🟡", ml: "മിതമായ സാധ്യത 🟡", pa: "ਦਰਮਿਆਨਾ ਖਤਰਾ 🟡", or: "ମଧ୍ୟମ ବିପଦ 🟡", as: "মজলীয়া বিপন্নতা 🟡", ur: "متوسط خطرہ 🟡", sa: "मध्यमसङ्कटम् 🟡" },
+  riskHigh: { en: "High Risk 🔴", hi: "उच्च जोखिम 🔴 (High)", gu: "ઉચ્ચ જોખમ 🔴 (High)", mr: "उच्च धोका 🔴 (High)", bn: "উচ্চ ঝুঁকি 🔴", ta: "அதிக அபாயம் 🔴", te: "అధిక ప్రమాదం 🔴", kn: "ಹೆಚ್ಚಿನ ಅಪಾಯ 🔴", ml: "ഉയർന്ന സാധ്യത 🔴", pa: "ਉੱਚਾ ਖਤਰਾ 🔴", or: "ଉଚ୍ଚ ବିପଦ 🔴", as: "উচ্চ বিপন্নতা 🔴", ur: "زیادہ خطرہ 🔴", sa: "उच्चसङ्कटम् 🔴" },
+  riskCritical: { en: "Critical Escalation 🔴", hi: "अत्यंत गंभीर 🔴 (Critical)", gu: "અત્યંત ગંભીર 🔴 (Critical)", mr: "अत्यंत गंभीर 🔴 (Critical)", bn: "জরুরী সংকট 🔴", ta: "அவசர நிலை 🔴", te: "అత్యవసర పరిస్థితి 🔴", kn: "ತುರ್ತು ಪರಿಸ್ಥಿತಿ 🔴", ml: "അടിയന്തര സാഹചര്യം 🔴", pa: "ਗੰਭੀਰ ਖਤਰਾ 🔴", or: "ଅତ୍ୟନ୍ତ ଗମ୍ଭୀର 🔴", as: "জৰুৰী কালীন 🔴", ur: "شدید ہنگامی صورتحال 🔴", sa: "अत्यन्तगम्भीरम् 🔴" },
 
-  // Metric Card Titles
-  totalPHCs: { en: 'Total PHCs', hi: 'कुल पीएचसी', gu: 'કુલ પીએચસી', mr: 'एकूण पीएचसी' },
-  healthcareWorkers: { en: 'Healthcare Workers', hi: 'स्वास्थ्य कार्यकर्ता', gu: 'આરોગ્ય કાર્યકરો', mr: 'आरोग्य कार्यकर्ते' },
-  hospitalsCount: { en: 'Hospitals', hi: 'अस्पताल', gu: 'હોસ્પિટલો', mr: 'रुग्णालये' },
-  registeredPatients: { en: 'Registered Patients (PID)', hi: 'पंजीकृत मरीज़ (PID)', gu: 'નોંધાયેલા દર્દીઓ (PID)', mr: 'नोंदणीकृत रुग्ण (PID)' },
-  activeReferrals: { en: 'Active Referrals', hi: 'सक्रिय रेफरल', gu: 'સક્રિય રેફરલ્સ', mr: 'सक्रिय संदर्भ' },
-  followUpsDue: { en: 'Follow-ups Due', hi: 'देय फॉलो-अप', gu: 'બાકી ફોલો-અપ્સ', mr: 'बाकी फॉलो-अप्स' },
-
-  // Patients Directory
-  patientsDirectory: { en: 'Patients Directory', hi: 'मरीज़ निर्देशिका', gu: 'દર્દીઓની ડિરેક્ટરી', mr: 'रुग्ण डिरेक्टरी' },
-  patientPIDText: { en: 'Official patient records tracked by unique Patient ID (PID).', hi: 'अनूठे पेशेंट आईडी (PID) द्वारा ट्रैक किए गए आधिकारिक मरीज़ रिकॉर्ड।', gu: 'અનન્ય પેશન્ટ આઇડી (PID) દ્વારા ટ્રેક કરાયેલા સત્તાવાર દર્દી રેકોર્ડ્સ.', mr: 'युनिक पेशंट आयडी (PID) द्वारे मागोवा घेतलेली अधिकृत रुग्ण नोंदणी.' },
-  registerNewPatient: { en: 'Register New Patient', hi: 'नया मरीज़ पंजीकृत करें', gu: 'નવા દર્દીની નોંધણી કરો', mr: 'नवीन रुग्णाची नोंदणी करा' },
-  resetDemoData: { en: 'Reset Demo Data', hi: 'डेमो डेटा रीसेट करें', gu: 'ડેમો ડેટા રીસેટ કરો', mr: 'डेमो डेटा रीसेट करा' },
-  searchPatientPlaceholder: { en: 'Search Name, PID (e.g. GC-2026-1001) or Village...', hi: 'नाम, PID (जैसे GC-2026-1001) या गाँव खोजें...', gu: 'નામ, PID (જેમ કે GC-2026-1001) અથવા ગામ શોધો...', mr: 'नाव, PID (उदा. GC-2026-1001) किंवा गाव शोधा...' },
-
+  // Stats & Dashboard
+  registeredPatients: { en: "Registered Patients (PID)", hi: "पंजीकृत मरीज़ (PID)", gu: "નોંધાયેલા દર્દીઓ (PID)", mr: "नोंदणीकृत रुग्ण (PID)", bn: "নিবন্ধিত রোগী (PID)", ta: "பதிவுசெய்த நோயாளிகள்", te: "నమోదిత రోగులు", kn: "ನೋಂದಾಯಿತ ರೋಗಿಗಳು", ml: "രജിസ്റ്റർ ചെയ്ത രോഗികൾ", pa: "ਰਜਿਸਟਰਡ ਮਰੀਜ਼", or: "ପଞ୍ଜୀକୃତ ରୋଗୀ", as: "পঞ্জীয়নভুক্ত ৰোগী", ur: "رجسٹرڈ مریض", sa: "पञ्जीकृतहृद्रोगिणः" },
+  activeReferrals: { en: "Active Referrals", hi: "सक्रिय रेफरल", gu: "સક્રિય રેફરલ્સ", mr: "सक्रिय संदर्भ", bn: "সক্রিয় রেফারেল", ta: "செயலில் உள்ள பரிந்துரைகள்", te: "యాక్టివ్ సూచనలు", kn: "ಸಕ್ರಿಯ ಉಲ್ಲೇಖಗಳು", ml: "ആക്ടീവ് റെഫറലുകൾ", pa: "ਐਕਟਿਵ ਰੈਫਰਲ", or: "ସକ୍ରିୟ ରେଫରାଲ", as: "সক্ৰিয় ৰেফাৰেল", ur: "فعال ریفرلز", sa: "सक्रियप्रेषणानि" },
+  followUpsDue: { en: "Follow-ups Due", hi: "देय फॉलो-अप", gu: "બાકી ફોલો-અપ્સ", mr: "बाकी फॉलो-अप्स", bn: "বকেয়া ফলো-আপ", ta: "நிலுவையில் உள்ள தொடர்புகள்", te: "బాకీ ఉన్న ఫాలో-అప్‌లు", kn: "ಬಾಕಿ ಇರುವ ಫಾಲೋ-ಅಪ್‌ಗಳು", ml: "പൂർത്തിയാക്കേണ്ട ഫോളോ-അപ്പുകൾ", pa: "ਬਾਕੀ ਫਾਲੋ-ਅਪ", or: "ବାକି ଫଲୋ-ଅପ୍", as: "বাকী ফলো-আপ", ur: "زیر التوا فالو اپ", sa: "अवशिष्टानुवर्तनम्" },
+  
   // Patient Profile & Reports
-  patientProfile: { en: 'Patient Record & Reports', hi: 'मरीज़ रिकॉर्ड और रिपोर्ट', gu: 'દર્દી રેકોર્ડ અને રિપોર્ટ્સ', mr: 'रुग्ण नोंदणी व अहवाल' },
-  patientReportsTab: { en: 'Patient Reports & Documents', hi: 'मरीज़ रिपोर्ट और दस्तावेज़', gu: 'દર્દી રિપોર્ટ્સ અને દસ્તાવેજો', mr: 'रुग्ण अहवाल आणि कागदपत्रे' },
-  addReportBtn: { en: 'Add Medical Report', hi: 'मेडिकल रिपोर्ट जोड़ें', gu: 'મેડિકલ રિપોર્ટ ઉમેરો', mr: 'वैद्यकीय अहवाल जोडा' },
-  recordVitalsBtn: { en: 'Record Vitals & Triage', hi: 'वाइटल्स और ट्रायेज दर्ज करें', gu: 'વાયટલ્સ અને ટ્રાયજ નોંધો', mr: 'व्हाइटल्स आणि ट्रायज नोंदवा' },
-  readOnlyNotice: { en: 'Read-Only Patient Record — Patients cannot modify clinical entries.', hi: 'केवल पढ़ने योग्य मरीज़ रिकॉर्ड — मरीज़ नैदानिक प्रविष्टियों को संशोधित नहीं कर सकते।', gu: 'ફક્ત વાંચવા માટેનો દર્દી રેકોર્ડ — દર્દીઓ ક્લિનિકલ એન્ટ્રીઓ બદલી શકતા નથી.', mr: 'फक्त वाचण्यासाठी रुग्ण नोंद — रुग्ण क्लिनिकल नोंदी बदलू शकत नाहीत.' },
+  patientProfile: { en: "Patient Record & Reports", hi: "मरीज़ रिकॉर्ड और रिपोर्ट", gu: "દર્દી રેકોર્ડ અને રિપોર્ટ્સ", mr: "रुग्ण नोंदणी व अहवाल", bn: "রোগীর রেকর্ড ও রিপোর্ট", ta: "நோயாளி பதிவுகள் & அறிக்கைகள்", te: "రోగి రికార్డులు & నివేదికలు", kn: "ರೋಗಿಯ ದಾಖಲೆ ಮತ್ತು ವರದಿಗಳು", ml: "രോഗിയുടെ വിവരങ്ങളും റിപ്പോർട്ടുകളും", pa: "ਮਰੀਜ਼ ਦੇ ਰਿਕਾਰਡ ਅਤੇ ਰਿਪੋਰਟਾਂ", or: "ରୋଗୀ ରେକର୍ଡ ଓ ରିପୋର୍ଟ", as: "ৰোগীৰ তথ্য আৰু ৰিপ'ৰ্ট", ur: "مریض کا بھیتر اور رپورٹ", sa: "रोगीविवरणम्" },
+  readOnlyNotice: { 
+    en: "Read-Only Patient Record — Patients cannot modify clinical entries.",
+    hi: "केवल पढ़ने योग्य मरीज़ रिकॉर्ड — मरीज़ नैदानिक प्रविष्टियों को संशोधित नहीं कर सकते।",
+    gu: "ફક્ત વાંચવા માટેનો દર્દી રેકોર્ડ — દર્દીઓ ક્લિનિકલ એન્ટ્રીઓ બદલી શકતા નથી.",
+    mr: "फक्त वाचण्यासाठी रुग्ण नोंद — रुग्ण क्लिनिकल नोंदी बदलू शकत नाहीत.",
+    bn: "কেবলমাত্র পঠনযোগ্য রোগী রেকর্ড — রোগীরা ক্লিনিকাল তথ্য সংশোধন করতে পারবেন না।",
+    ta: "வாசிக்க மட்டுமே உரிய பதிவு — நோயாளிகள் தரவுகளை மாற்ற முடியாது.",
+    te: "చదవడానికి మాత్రమే అనుకూలం — రోగులు వివరాలను మార్చలేరు.",
+    kn: "ಓದಲು ಮಾತ್ರ ಸೀಮಿತ ದಾಖಲೆ — ರೋಗಿಗಳು ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ.",
+    ml: "വായിക്കാൻ മാത്രം സാധിക്കുന്ന വിവരങ്ങൾ — മാറ്റങ്ങൾ വരുത്താൻ കഴിയില്ല.",
+    pa: "ਸਿਰਫ਼ ਦੇਖਣ ਲਈ ਰਿਕਾਰਡ — ਮਰੀਜ਼ ਬਦਲਾਅ ਨਹੀਂ ਕਰ ਸਕਦੇ।",
+    or: "କେବଳ ଦେଖିବା ପାଇଁ — ରୋଗୀ ସଂଶୋଧନ କରିପାରିବେ ନାହିଁ।",
+    as: "কেৱল পঢ়িবৰ বাবে — ৰোগীয়ে সালসলনি কৰিব নোৱাৰে।",
+    ur: "صرف پڑھنے کے لیے — مریض تبدیلی نہیں کر سکتے۔",
+    sa: "केवलपठनयोग्यविवरणम् — परिवर्तनं न सम्भवति।"
+  },
 
-  // Referrals
-  referralsTitle: { en: 'Inter-Facility Referrals', hi: 'इंटर-फैसिलिटी रेफरल', gu: 'ઇન્ટર-ફેસિલીટી રેફરલ', mr: 'इंटर-फॅसिलिटी रेफरल्स' },
-  lookupByPIDTitle: { en: 'Find Patient Medical Details by PID', hi: 'PID द्वारा मरीज़ के चिकित्सा विवरण खोजें', gu: 'PID દ્વારા દર્દીની મેડિકલ વિગતો શોધો', mr: 'PID द्वारे रुग्णाची वैद्यकीय माहिती शोधा' },
-  enterPIDPlaceholder: { en: 'Enter PID (e.g. GC-2026-1001)...', hi: 'PID दर्ज करें (जैसे GC-2026-1001)...', gu: 'PID દાખલ કરો (જેમ કે GC-2026-1001)...', mr: 'PID प्रविष्ट करा (उदा. GC-2026-1001)...' },
-  lookupBtn: { en: 'Lookup PID', hi: 'PID खोजें', gu: 'PID શોધો', mr: 'PID शोधा' },
-  createReferralBtn: { en: 'Create New Referral', hi: 'नया रेफरल बनाएं', gu: 'નવું રેફરલ બનાવો', mr: 'नवीन संदर्भ तयार करा' },
-
-  // Reminders & Notifications
-  remindersTitle: { en: 'Reminders & Notifications', hi: 'रिमाइंडर और सूचनाएं', gu: 'રિમાઇન્ડર્સ અને સૂચનાઓ', mr: 'रिमाइंडर्स आणि सूचना' },
-  appointmentReminders: { en: 'Appointment Reminders', hi: 'अपॉइंटमेंट रिमाइंडर', gu: 'એપોઇન્ટમેન્ટ રિમાઇન્ડર્સ', mr: 'अपॉइंटमेंट रिमाइंडर्स' },
-  emergencyAlerts: { en: 'PHC Emergency Alerts', hi: 'पीएचसी आपातकालीन अलर्ट', gu: 'પીએચસી કટોકટી ચેતવણીઓ', mr: 'पीएचसी आणीबाणी इशारे' },
-  prescriptionTimings: { en: 'Prescription Dosage Timings', hi: 'दवा खुराक का समय', gu: 'દવાના ડોઝનો સમય', mr: 'औषधांच्या वेळेचे वेळापत्रक' },
-  markAsTaken: { en: 'Mark as Taken', hi: 'दवा ली दर्ज करें', gu: 'લેવાઈ ગઈ નોંધો', mr: 'औषध घेतले नोंदवा' },
-  setAlarm: { en: 'Set Reminder Alarm', hi: 'रिमाइंडर अलार्म सेट करें', gu: 'રિમાઇન્ડર એલાર્મ સેટ કરો', mr: 'रिमाइंडर अलार्म सेट करा' }
+  // Referral & Search
+  lookupByPIDTitle: { en: "Find Patient Medical Details by PID", hi: "PID द्वारा मरीज़ के चिकित्सा विवरण खोजें", gu: "PID દ્વારા દર્દીની મેડિકલ વિગતો શોધો", mr: "PID द्वारे रुग्णाची वैद्यकीय माहिती शोधा", bn: "PID দিয়ে রোগীর বিবরণ খুঁজুন", ta: "PID மூலம் விவரங்களை தேடுக", te: "PID ద్వారా రోగి వివరాలను వెతకండి", kn: "PID ಮೂಲಕ ರೋಗಿಯ ವಿವರ ಹುಡುಕಿ", ml: "PID വഴി വിവരങ്ങൾ കണ്ടെത്തുക", pa: "PID ਦੁਆਰਾ ਮਰੀਜ਼ ਲੱਭੋ", or: "PID ଦ୍ୱାରା ରୋଗୀ ଖୋଜନ୍ତୁ", as: "PID যোগে ৰোগীৰ তথ্য বিচাৰক", ur: "PID سے مریض کی تفصیلات تلاش کریں", sa: "PID द्वारे रोगीविवरणं अन्विष्यतु" },
+  enterPIDPlaceholder: { en: "Enter PID (e.g. GC-2026-1001)...", hi: "PID दर्ज करें (जैसे GC-2026-1001)...", gu: "PID દાખલ કરો (જેમ કે GC-2026-1001)...", mr: "PID प्रविष्ट करा (उदा. GC-2026-1001)...", bn: "PID লিখুন (যেমন GC-2026-1001)...", ta: "PID உள்ளிடுக...", te: "PID నమోదు చేయండి...", kn: "PID ನಮೂದಿಸಿ...", ml: "PID നൽകുക...", pa: "PID ਦਰਜ ਕਰੋ...", or: "PID ଲେଖନ୍ତୁ...", as: "PID লিখক...", ur: "PID درج کریں...", sa: "PID प्रविशतु..." },
+  lookupBtn: { en: "Lookup PID", hi: "PID खोजें", gu: "PID શોધો", mr: "PID शोधा", bn: "PID সন্ধান করুন", ta: "PID தேடுக", te: "PID శోధన", kn: "PID ಹುಡುಕಿ", ml: "PID തിരിയുക", pa: "PID ਲੱਭੋ", or: "PID ଖୋଜନ୍ତୁ", as: "PID বিচাৰক", ur: "PID تلاش کریں", sa: "PID अन्विष्यतु" }
 };
+
+export function getTranslation(key: string, lang: SupportedLanguage, fallbackText?: string): string {
+  if (translations[key]) {
+    const localized = translations[key][lang];
+    if (localized) return localized;
+    const english = translations[key]['en'];
+    if (english) return english;
+  }
+  return fallbackText || key;
+}
