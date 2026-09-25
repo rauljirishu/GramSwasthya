@@ -6,6 +6,7 @@ import { DashboardShell } from '@/components/dashboard-shell';
 import { BookAppointmentModal } from '@/components/book-appointment-modal';
 import { getAppointments } from '@/lib/api/doctor';
 import type { Appointment } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n/use-translation';
 import { 
   Calendar, 
   Clock, 
@@ -16,8 +17,6 @@ import {
   Search, 
   ShieldCheck, 
   CheckCircle2, 
-  AlertCircle,
-  FileText,
   Filter,
   ArrowRight
 } from 'lucide-react';
@@ -29,6 +28,7 @@ export default function AppointmentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [notice, setNotice] = useState('');
+  const { t } = useTranslation();
 
   async function fetchAppointments() {
     setLoading(true);
@@ -47,7 +47,6 @@ export default function AppointmentsPage() {
   }, []);
 
   const handleBookingSuccess = (newAppt: Appointment) => {
-    // Add to local state immediately so it is shown in the list right away!
     setAppointments((prev) => [newAppt, ...prev.filter(a => a.id !== newAppt.id)]);
     setNotice(`Appointment successfully booked for ${newAppt.patient?.name || 'Patient'} and saved in database!`);
     setTimeout(() => setNotice(''), 4000);
@@ -74,18 +73,18 @@ export default function AppointmentsPage() {
     });
   }, [appointments, searchQuery, statusFilter]);
 
-      const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-3 py-1 text-xs font-black text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800">Confirmed</span>;
+        return <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-3 py-1 text-xs font-black text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800">{t('confirmed', 'Confirmed')}</span>;
       case 'in_progress':
-        return <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-black text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 animate-pulse">In Progress</span>;
+        return <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-black text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 animate-pulse">{t('inProgress', 'In Progress')}</span>;
       case 'completed':
-        return <span className="rounded-full bg-indigo-100 dark:bg-indigo-950/60 px-3 py-1 text-xs font-black text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">Completed</span>;
+        return <span className="rounded-full bg-indigo-100 dark:bg-indigo-950/60 px-3 py-1 text-xs font-black text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">{t('completed', 'Completed')}</span>;
       case 'cancelled':
-        return <span className="rounded-full bg-rose-100 dark:bg-rose-950/60 px-3 py-1 text-xs font-black text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800">Cancelled</span>;
+        return <span className="rounded-full bg-rose-100 dark:bg-rose-950/60 px-3 py-1 text-xs font-black text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800">{t('cancelled', 'Cancelled')}</span>;
       default:
-        return <span className="rounded-full bg-blue-50 dark:bg-blue-950/60 px-3 py-1 text-xs font-black text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">Scheduled</span>;
+        return <span className="rounded-full bg-blue-50 dark:bg-blue-950/60 px-3 py-1 text-xs font-black text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">{t('scheduled', 'Scheduled')}</span>;
     }
   };
 
@@ -97,7 +96,9 @@ export default function AppointmentsPage() {
           <span className="eyebrow flex items-center gap-1.5">
             <Calendar className="h-4 w-4" /> Clinical Scheduling System
           </span>
-          <h1 className="mt-1 text-3xl font-black text-slate-900 dark:text-white">Patient Appointments</h1>
+          <h1 className="mt-1 text-3xl font-black text-slate-900 dark:text-white">
+            {t('navAppointments', 'Patient Appointments')}
+          </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             View, schedule and track verified clinical appointments with unique Patient IDs (PID)
           </p>
@@ -107,7 +108,7 @@ export default function AppointmentsPage() {
           className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-500/25 transition-all duration-200"
         >
           <Plus className="h-5 w-5" />
-          <span>Book Appointment</span>
+          <span>{t('bookAppointmentBtn', 'Book Appointment')}</span>
         </button>
       </div>
 
@@ -177,7 +178,7 @@ export default function AppointmentsPage() {
               onClick={() => setIsModalOpen(true)}
               className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700 transition"
             >
-              <Plus className="h-4 w-4" /> Book Appointment Now
+              <Plus className="h-4 w-4" /> {t('bookAppointmentBtn', 'Book Appointment Now')}
             </button>
           </div>
         ) : (
@@ -211,7 +212,6 @@ export default function AppointmentsPage() {
 
                   return (
                     <tr key={apt.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
-                      {/* Patient & PID */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-black text-xs">
@@ -236,7 +236,6 @@ export default function AppointmentsPage() {
                         </div>
                       </td>
 
-                      {/* Date & Time */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
                           <Calendar className="h-3.5 w-3.5 text-blue-600" />
@@ -248,7 +247,6 @@ export default function AppointmentsPage() {
                         </div>
                       </td>
 
-                      {/* Purpose */}
                       <td className="px-6 py-4">
                         <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">{apt.purpose}</p>
                         {apt.clinical_notes && (
@@ -256,7 +254,6 @@ export default function AppointmentsPage() {
                         )}
                       </td>
 
-                      {/* Doctor & Facility */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-800 dark:text-slate-200">
                           <Stethoscope className="h-3.5 w-3.5 text-indigo-600" />
@@ -268,12 +265,10 @@ export default function AppointmentsPage() {
                         </div>
                       </td>
 
-                      {/* Status */}
                       <td className="px-6 py-4">
                         {getStatusBadge(apt.status)}
                       </td>
 
-                      {/* Action */}
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={apt.patient?.patient_code ? `/patients/${apt.patient.patient_code}` : `/patients`}
