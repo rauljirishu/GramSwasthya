@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { supabase } from '@/lib/supabase/client';
 import { createPatientCode } from '@/lib/patient-id';
@@ -20,8 +20,8 @@ type PatientRow = Record<string, any> & {
 };
 
 const blank = {
-  name: '', age: '', gender: 'female', phone: '', address: '', village: '', district: '',
-  emergency_contact: '', blood_group: '', allergies: '', existing_conditions: '',
+  name: '', age: '', gender: 'female', phone: '', alternate_phone: '', address: '', village: '', district: '', state: '', pincode: '',
+  emergency_contact: '', emergency_contact_name: '', emergency_contact_relation: '', emergency_contact_phone: '', blood_group: '', allergies: '', existing_conditions: '',
   previous_major_illnesses: '', current_medications: '', notes: ''
 };
 const listify = (value: string) => value.split(',').map(item => item.trim()).filter(Boolean);
@@ -48,11 +48,17 @@ export default function PatientsPage() {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState('');
+  const [canRegister, setCanRegister] = useState(false);
 
   async function load() {
     setLoading(true);
     const current = await import('@/lib/auth').then(module => module.currentRole());
     if (current) setRole(current);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase.from('users').select('role,facility_id').eq('id', user.id).single();
+      setCanRegister(Boolean(profile?.facility_id && ['phc_head', 'phc_worker', 'head', 'worker', 'asha', 'anm'].includes(profile.role)));
+    } else setCanRegister(false);
     const { data, error } = await supabase
       .from('patients')
       .select('*, facilities(name)')
@@ -78,12 +84,16 @@ export default function PatientsPage() {
 
   async function registerPatient(event: React.FormEvent) {
     event.preventDefault();
+    if (!form.name.trim() || !form.age || !form.phone.trim() || !form.address.trim() || !form.village.trim()) {
+      setMessage('Enter the patient name, age, primary phone number, full address, and village.');
+      return;
+    }
     setBusy(true);
     setMessage('');
     const { data: { user } } = await supabase.auth.getUser();
     const { data: profile } = await supabase.from('users').select('facility_id,role').eq('id', user?.id || '').single();
-    if (!user || role !== 'worker' || !profile?.facility_id || !['phc_worker', 'worker', 'asha', 'anm'].includes(profile.role)) {
-      setMessage('Patient registration requires an authorised worker account assigned to a PHC.');
+    if (!user || !['worker', 'head'].includes(role) || !profile?.facility_id || !['phc_head', 'phc_worker', 'head', 'worker', 'asha', 'anm'].includes(profile.role)) {
+      setMessage('Only an authorised PHC Head or PHC Worker assigned to a facility can register patients.');
       setBusy(false);
       return;
     }
@@ -94,10 +104,16 @@ export default function PatientsPage() {
       age: Number(form.age),
       gender: form.gender,
       phone: form.phone.trim() || null,
+      alternate_phone: form.alternate_phone.trim() || null,
       address: form.address.trim() || null,
       village: form.village.trim(),
       district: form.district.trim() || null,
-      emergency_contact: form.emergency_contact.trim() || null,
+      state: form.state.trim() || null,
+      pincode: form.pincode.trim() || null,
+      emergency_contact: form.emergency_contact_phone.trim() || form.emergency_contact.trim() || null,
+      emergency_contact_name: form.emergency_contact_name.trim() || null,
+      emergency_contact_relation: form.emergency_contact_relation.trim() || null,
+      emergency_contact_phone: form.emergency_contact_phone.trim() || form.emergency_contact.trim() || null,
       blood_group: form.blood_group.trim() || null,
       allergies: listify(form.allergies),
       existing_conditions: listify(form.existing_conditions),
@@ -115,8 +131,6 @@ export default function PatientsPage() {
     setMessage(`Patient record ${patientCode} registered successfully.`);
     await load();
   }
-
-  const canRegister = role === 'worker';
 
   return (
     <DashboardShell>
@@ -153,7 +167,7 @@ export default function PatientsPage() {
                   {patients.map(patient => {
                     const isExpanded = expandedId === patient.id;
                     const facility = Array.isArray(patient.facilities) ? patient.facilities[0] : patient.facilities;
-                    return <>
+                    return <Fragment key={patient.id}>
                       <tr key={patient.id} className="border-t border-slate-100">
                         <td className="px-4 py-4"><b>{patient.name}</b><span className="mt-1 block text-xs text-slate-500">{patient.patient_code || 'No PID'} · {patient.age} years · {patient.gender}</span></td>
                         <td className="px-4 py-4">{patient.village || 'Not recorded'}<span className="block text-xs text-slate-500">{patient.district || ''}</span></td>
@@ -162,7 +176,7 @@ export default function PatientsPage() {
                         <td className="px-4 py-4"><div className="flex items-center gap-3"><button type="button" onClick={() => setExpandedId(isExpanded ? null : patient.id)} className="inline-flex items-center gap-1 text-xs font-bold text-blue-700">{isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}{isExpanded ? 'Hide' : 'Show all data'}</button>{patient.patient_code && <Link className="text-xs font-bold text-slate-600 hover:text-blue-700" href={`/patients/${encodeURIComponent(patient.patient_code)}`}>Health profile</Link>}</div></td>
                       </tr>
                       {isExpanded && <tr key={`${patient.id}-details`} className="border-t border-slate-100 bg-slate-50"><td colSpan={5} className="p-4"><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{Object.entries(patient).filter(([key, value]) => key !== 'facilities' && value !== null && value !== undefined && value !== '').map(([key, value]) => <div key={key} className="rounded-lg border border-slate-200 bg-white p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{labelFor(key)}</p><p className="mt-1 break-words text-xs font-semibold text-slate-800">{displayValue(value)}</p></div>)}</div></td></tr>}
-                    </>;
+                    </Fragment>;
                   })}
                 </tbody>
               </table>
@@ -171,7 +185,7 @@ export default function PatientsPage() {
         </section>
       </div>
 
-      {showForm && <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4"><form onSubmit={registerPatient} className="card mx-auto my-6 w-full max-w-3xl p-6"><div className="flex justify-between"><div><h2 className="text-xl font-black">PHC Worker Patient Registration</h2><p className="mt-1 text-sm text-slate-600">A unique PID will be generated for this patient record.</p></div><button type="button" onClick={() => setShowForm(false)} aria-label="Close"><X className="h-5 w-5" /></button></div><div className="mt-5 grid gap-4 sm:grid-cols-2">{([['name','Full name'],['age','Age'],['phone','Contact number'],['village','Village'],['district','District / area'],['address','Address'],['emergency_contact','Emergency contact'],['blood_group','Blood group'],['allergies','Allergies (comma-separated)'],['existing_conditions','Existing conditions (comma-separated)'],['previous_major_illnesses','Previous illnesses (comma-separated)'],['current_medications','Current medicines (comma-separated)']] as [keyof typeof blank,string][]).map(([key,label])=><label key={key} className="text-sm font-bold">{label}<input required={['name','age','village'].includes(key)} type={key==='age'?'number':'text'} value={form[key]} onChange={event=>updateField(key,event.target.value)} className="input mt-1" /></label>)}<label className="text-sm font-bold">Gender<select value={form.gender} onChange={event=>updateField('gender',event.target.value)} className="input mt-1"><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="unknown">Not recorded</option></select></label><label className="text-sm font-bold sm:col-span-2">Clinical notes<textarea value={form.notes} onChange={event=>updateField('notes',event.target.value)} className="input mt-1 min-h-20" /></label></div><button disabled={busy} className="primary-btn mt-6">{busy?'Saving…':'Register patient'}</button></form></div>}
+      {showForm && canRegister && <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4"><form onSubmit={registerPatient} className="card mx-auto my-6 w-full max-w-3xl p-6"><div className="flex justify-between"><div><h2 className="text-xl font-black">PHC Patient Registration</h2><p className="mt-1 text-sm text-slate-600">Only assigned PHC staff can register a patient. A unique PID is generated automatically.</p></div><button type="button" onClick={() => setShowForm(false)} aria-label="Close"><X className="h-5 w-5" /></button></div><div className="mt-5 grid gap-4 sm:grid-cols-2">{([['name','Full name'],['age','Age'],['phone','Primary contact number'],['alternate_phone','Alternate contact number'],['village','Village'],['district','District / area'],['state','State'],['pincode','PIN code'],['address','Full address'],['emergency_contact_name','Emergency contact name'],['emergency_contact_relation','Relationship to patient'],['emergency_contact_phone','Emergency contact number'],['blood_group','Blood group'],['allergies','Allergies (comma-separated)'],['existing_conditions','Current diseases / conditions (comma-separated)'],['previous_major_illnesses','Previous major illnesses (comma-separated)'],['current_medications','Current medicines (comma-separated)']] as [keyof typeof blank,string][]).map(([key,label])=><label key={key} className="text-sm font-bold">{label}<input required={['name','age','phone','village','address'].includes(key)} type={key==='age'?'number':'text'} min={key==='age'?'0':undefined} max={key==='age'?'130':undefined} value={form[key]} onChange={event=>updateField(key,event.target.value)} className="input mt-1" /></label>)}<label className="text-sm font-bold">Gender<select value={form.gender} onChange={event=>updateField('gender',event.target.value)} className="input mt-1"><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="unknown">Not recorded</option></select></label><label className="text-sm font-bold sm:col-span-2">Clinical notes<textarea value={form.notes} onChange={event=>updateField('notes',event.target.value)} className="input mt-1 min-h-20" /></label></div><button disabled={busy} className="primary-btn mt-6">{busy?'Saving…':'Register patient'}</button></form></div>}
     </DashboardShell>
   );
 }
