@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowLeft, Lock, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { createAccountId, type RequestedAccountRole } from '@/lib/account-id';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -12,9 +13,11 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [requestedRole, setRequestedRole] = useState('patient');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [createdAccount, setCreatedAccount] = useState<{ id: string; role: RequestedAccountRole } | null>(null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,8 +27,14 @@ export default function SignupPage() {
       setError('Password must be at least 8 characters long.');
       return;
     }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     setBusy(true);
     const targetEmail = email.trim();
+    const roleToRequest = requestedRole as RequestedAccountRole;
+    const accountId = createAccountId(roleToRequest);
 
     // 1. Sign up user in Supabase Auth
     const { data, error: signupError } = await supabase.auth.signUp({
@@ -34,7 +43,8 @@ export default function SignupPage() {
       options: {
         data: {
           name: name.trim(),
-          requested_role: requestedRole
+          requested_role: roleToRequest,
+          account_id: accountId,
         }
       }
     });
@@ -48,30 +58,17 @@ export default function SignupPage() {
     // Role requests are recorded for Central Authority review. Self-signup
     // must never grant staff privileges; patient remains the safe initial role.
     if (data.user) {
-      const { data: profile } = await supabase.from('users').select('id,role').eq('id', data.user.id).single();
-      if (!profile) {
-        const { error: profileError } = await supabase.from('users').upsert({
-          id: data.user.id,
-          name: name.trim(),
-          email: targetEmail,
-          role: 'patient'
-        });
-        if (profileError) {
-          setError(`Account created, but the profile could not be initialized: ${profileError.message}`);
-          setBusy(false);
-          return;
-        }
+      if (!data.session) {
+        router.replace(`/verify-email?email=${encodeURIComponent(targetEmail)}&accountId=${encodeURIComponent(accountId)}&requestedRole=${encodeURIComponent(roleToRequest)}`);
+        return;
       }
-
-      if (requestedRole !== 'patient') {
-        router.replace(`/login?roleRequest=${encodeURIComponent(requestedRole)}`);
-      } else {
-        router.replace('/patient-dashboard');
-      }
+      if (roleToRequest !== 'patient') await supabase.auth.signOut();
+      setCreatedAccount({ id: accountId, role: roleToRequest });
+      setBusy(false);
       return;
     }
 
-    router.replace(`/verify-email?email=${encodeURIComponent(targetEmail)}`);
+    router.replace(`/verify-email?email=${encodeURIComponent(targetEmail)}&accountId=${encodeURIComponent(accountId)}&requestedRole=${encodeURIComponent(roleToRequest)}`);
   }
 
   return (
@@ -110,7 +107,14 @@ export default function SignupPage() {
 
           {error && <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-800">{error}</p>}
 
-          <form onSubmit={submit} className="mt-6 space-y-4">
+          {createdAccount && <div role="status" className="mt-5 space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+            <p className="font-bold">Account created. Save your unique ID:</p>
+            <p className="rounded-xl border border-emerald-200 bg-white px-4 py-3 text-center font-mono text-xl font-black tracking-wider">{createdAccount.id}</p>
+            {createdAccount.role === 'patient' ? <p>Use this Patient ID when contacting your PHC. Your clinical PID is linked when your patient record is registered.</p> : <p>Your {createdAccount.role === 'central_authority' ? 'Central Authority' : createdAccount.role === 'phc_head' ? 'PHC Head' : 'PHC Worker'} access request is pending Central Authority approval. This ID does not activate staff permissions.</p>}
+            <button type="button" onClick={() => router.replace(createdAccount.role === 'patient' ? '/patient-dashboard' : `/login?roleRequest=${encodeURIComponent(createdAccount.role)}`)} className="secondary-btn w-full justify-center">Continue to sign in</button>
+          </div>}
+
+          {!createdAccount && <form onSubmit={submit} className="mt-6 space-y-4">
             <label className="block text-xs font-bold text-slate-800">
               Full Name
               <input required value={name} onChange={event => setName(event.target.value)} className="input mt-1.5 py-2 text-xs font-semibold" placeholder="e.g. Dr. Sunita Rao" />
@@ -124,10 +128,10 @@ export default function SignupPage() {
             <label className="block text-xs font-bold text-slate-800">
               Account Role Scope
               <select value={requestedRole} onChange={event => setRequestedRole(event.target.value)} className="input mt-1.5 py-2 text-xs font-semibold">
-                <option value="central_authority">Central Authority</option>
-                <option value="phc_head">Area / PHC Head</option>
-                <option value="phc_worker">PHC Worker</option>
-                <option value="patient">Patient Account (Personal Linked Record)</option>
+                <option value="central_authority">Central Authority (CID)</option>
+                <option value="phc_head">PHC Head (PHH ID)</option>
+                <option value="phc_worker">PHC Staff / Worker (PHW ID)</option>
+                <option value="patient">Patient (PID)</option>
               </select>
               {requestedRole !== 'patient' && <span className="mt-1 block text-[11px] font-medium text-amber-700">Staff role requests need Central Authority approval before staff access is enabled.</span>}
             </label>
@@ -142,11 +146,16 @@ export default function SignupPage() {
               </span>
             </label>
 
+            <label className="block text-xs font-bold text-slate-800">
+              Confirm Password
+              <input required type={showPassword ? 'text' : 'password'} minLength={8} value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} className="input mt-1.5 py-2 text-xs font-semibold" placeholder="Re-enter password" />
+            </label>
+
             <button disabled={busy} className="primary-btn w-full justify-center py-2.5 bg-blue-600 hover:bg-blue-700 text-xs mt-2">
               <Lock className="h-4 w-4" />
               {busy ? 'Creating account...' : 'Create Account & Sign In'}
             </button>
-          </form>
+          </form>}
 
           <p className="mt-5 text-center text-xs font-semibold text-slate-600">
             Already have an account? <Link href="/login" className="font-bold text-blue-700">Sign in here</Link>

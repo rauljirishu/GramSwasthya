@@ -17,6 +17,8 @@ import {
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get('email') || '';
+  const accountId = searchParams.get('accountId') || '';
+  const requestedRole = searchParams.get('requestedRole') || 'patient';
   const errorParam = searchParams.get('error') || '';
 
   const [email, setEmail] = useState(emailParam);
@@ -109,6 +111,12 @@ function VerifyEmailContent() {
               <span className="font-extrabold text-slate-900 text-sm truncate">{email}</span>
             </div>
           )}
+
+          {accountId && <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
+            <p className="text-xs font-bold uppercase tracking-wide">Your new GramCare ID</p>
+            <p className="mt-2 text-center font-mono text-xl font-black tracking-wider">{accountId}</p>
+            <p className="mt-2 text-xs">Save this ID. {requestedRole === 'patient' ? 'Your clinical patient record receives a PID when it is registered at a PHC.' : 'Staff access remains pending until Central Authority approves the account.'}</p>
+          </div>}
 
           {notice && (
             <div role="status" className="mt-5 flex items-start gap-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-800">

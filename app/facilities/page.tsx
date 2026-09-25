@@ -97,7 +97,7 @@ export default function FacilitiesPage() {
     try {
       await createFacility({
         name: name.trim(),
-        code: code.trim() || `PHC-${Math.floor(1000 + Math.random() * 9000)}`,
+        code: code.trim() || undefined,
         facility_type: facilityType,
         village: village.trim() || undefined,
         district: district.trim() || undefined,
@@ -313,14 +313,15 @@ export default function FacilitiesPage() {
                 </label>
 
                 <label className="block">
-                  Facility Code
+                  Facility Code (optional)
                   <input
                     type="text"
                     value={code}
                     onChange={e => setCode(e.target.value)}
-                    placeholder="e.g. PHC-RAMPUR-002"
+                    placeholder="Leave blank to generate a unique PHC ID"
                     className="input mt-1 text-xs font-semibold"
                   />
+                  <span className="mt-1 block text-[11px] text-slate-500">A unique PHC ID is generated automatically when this facility is saved.</span>
                 </label>
 
                 <label className="block">

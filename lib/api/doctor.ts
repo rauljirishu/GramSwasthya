@@ -1085,7 +1085,7 @@ export async function createFacility(input: {
 }): Promise<Facility> {
   const payload = {
     name: input.name,
-    code: input.code || `PHC-${Math.floor(1000 + Math.random() * 9000)}`,
+    code: input.code?.trim() || undefined,
     facility_type: input.facility_type || 'Primary Health Centre',
     address: input.address || null,
     village: input.village || null,
