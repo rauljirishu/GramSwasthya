@@ -155,7 +155,7 @@ export default function Patients() {
       </div>
 
       {message && (
-        <p className="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-3.5 text-xs font-bold text-emerald-800">
+        <p className="mt-4 rounded-xl bg-blue-50 border border-blue-200 p-3.5 text-xs font-bold text-blue-800">
           {message}
         </p>
       )}
@@ -205,7 +205,7 @@ export default function Patients() {
                     <td className="px-5 py-4 font-semibold text-slate-700">{p.village || 'Rampur'}</td>
                     <td className="px-5 py-4 text-xs font-semibold text-slate-600">{p.facilities?.[0]?.name || 'GramCare PHC'}</td>
                     <td className="px-5 py-4">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+                      <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 border border-blue-200">
                         {p.verification_status || 'Verified'}
                       </span>
                     </td>

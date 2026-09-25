@@ -189,8 +189,8 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
         )}
 
         {successMsg && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 p-3.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 p-3.5 text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-blue-600" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -248,7 +248,7 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
           {/* Facility Selection */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <Building2 className="h-3.5 w-3.5 text-emerald-600" /> Healthcare Facility / PHC
+              <Building2 className="h-3.5 w-3.5 text-blue-600" /> Healthcare Facility / PHC
             </label>
             <select
               value={facilityId}

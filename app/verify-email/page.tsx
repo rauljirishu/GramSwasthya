@@ -92,7 +92,7 @@ function VerifyEmailContent() {
           </div>
 
           <div className="mt-4 flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+            <ShieldCheck className="h-5 w-5 text-blue-600" />
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Authentication Guard</span>
           </div>
 
@@ -111,8 +111,8 @@ function VerifyEmailContent() {
           )}
 
           {notice && (
-            <div role="status" className="mt-5 flex items-start gap-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-800">
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
+            <div role="status" className="mt-5 flex items-start gap-3 rounded-2xl bg-blue-50 border border-blue-200 p-4 text-sm font-bold text-blue-800">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-blue-600 mt-0.5" />
               <span>{notice}</span>
             </div>
           )}

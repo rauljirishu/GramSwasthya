@@ -182,7 +182,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {/* Sync & Connectivity Indicator */}
           <div
             className={`hidden items-center gap-2 text-xs font-bold sm:flex ${
-              online ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'
+              online ? 'text-blue-600 dark:text-blue-400' : 'text-amber-700 dark:text-amber-400'
             }`}
           >
             <Wifi className="h-4 w-4" />

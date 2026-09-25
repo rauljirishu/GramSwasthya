@@ -58,7 +58,7 @@ export default function Dashboard() {
       </section>
 
       {notice && (
-        <div className="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-3.5 text-xs font-bold text-emerald-800">
+        <div className="mt-4 rounded-xl bg-blue-50 border border-blue-200 p-3.5 text-xs font-bold text-blue-800">
           {notice}
         </div>
       )}
@@ -73,7 +73,7 @@ export default function Dashboard() {
           <div className="card p-4" key={name}>
             <div className="flex justify-between text-slate-500">
               <span className="text-xs font-bold uppercase">{name}</span>
-              {i % 2 ? <Activity className="h-4 w-4 text-emerald-600" /> : <Users className="h-4 w-4 text-blue-600" />}
+              {i % 2 ? <Activity className="h-4 w-4 text-blue-600" /> : <Users className="h-4 w-4 text-blue-600" />}
             </div>
             <p className="mt-3 text-3xl font-black">{value || 'View'}</p>
             <p className="mt-1 text-xs text-slate-500">Authorised information only</p>

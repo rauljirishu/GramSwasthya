@@ -74,14 +74,14 @@ export default function AppointmentsPage() {
     });
   }, [appointments, searchQuery, statusFilter]);
 
-  const getStatusBadge = (status: string) => {
+      const getStatusBadge = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-3 py-1 text-xs font-black text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">Confirmed</span>;
+        return <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-3 py-1 text-xs font-black text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800">Confirmed</span>;
       case 'in_progress':
         return <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-black text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 animate-pulse">In Progress</span>;
       case 'completed':
-        return <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-3 py-1 text-xs font-black text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800">Completed</span>;
+        return <span className="rounded-full bg-indigo-100 dark:bg-indigo-950/60 px-3 py-1 text-xs font-black text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">Completed</span>;
       case 'cancelled':
         return <span className="rounded-full bg-rose-100 dark:bg-rose-950/60 px-3 py-1 text-xs font-black text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800">Cancelled</span>;
       default:
@@ -119,8 +119,8 @@ export default function AppointmentsPage() {
 
       {/* Notice Banner */}
       {notice && (
-        <div className="mb-6 flex items-center gap-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 p-4 text-sm font-bold text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800 animate-in fade-in">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+        <div className="mb-6 flex items-center gap-2 rounded-2xl bg-blue-50 dark:bg-blue-950/60 p-4 text-sm font-bold text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 animate-in fade-in">
+          <CheckCircle2 className="h-5 w-5 text-blue-600" />
           <span>{notice}</span>
         </div>
       )}
@@ -263,7 +263,7 @@ export default function AppointmentsPage() {
                           <span>{doctorName}</span>
                         </div>
                         <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
-                          <Building2 className="h-3.5 w-3.5 text-emerald-600" />
+                          <Building2 className="h-3.5 w-3.5 text-blue-600" />
                           <span>{facilityName}</span>
                         </div>
                       </td>

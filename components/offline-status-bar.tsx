@@ -28,8 +28,8 @@ export function OfflineStatusBar() {
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
           {isOnline ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 font-extrabold text-emerald-700 border border-emerald-200">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 font-extrabold text-blue-700 border border-blue-200">
+              <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
               <Wifi className="h-3.5 w-3.5" />
               <span>Online — data synchronized</span>
             </span>
@@ -62,7 +62,7 @@ export function OfflineStatusBar() {
 
           {pendingCount === 0 && (
             <span className="hidden sm:inline-flex items-center gap-1 font-medium text-slate-500">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
               <span>All records synced</span>
             </span>
           )}

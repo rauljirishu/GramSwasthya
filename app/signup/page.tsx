@@ -83,7 +83,7 @@ export default function SignupPage() {
             <UserPlus className="h-7 w-7" />
           </div>
           <div className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
+            <ShieldCheck className="h-4 w-4 text-blue-600" />
             Verified account creation
           </div>
           <h1 className="mt-2 text-3xl font-black text-slate-900">Create your account</h1>

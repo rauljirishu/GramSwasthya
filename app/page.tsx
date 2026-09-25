@@ -74,8 +74,8 @@ export default function Home() {
           </div>
 
           {notice && (
-            <div className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 p-3 text-xs font-bold text-emerald-800 dark:text-emerald-200 border border-emerald-200">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 p-3 text-xs font-bold text-blue-800 dark:text-blue-200 border border-blue-200">
+              <CheckCircle2 className="h-4 w-4 text-blue-600" />
               <span>{notice}</span>
             </div>
           )}
