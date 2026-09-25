@@ -140,6 +140,13 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
   useEffect(() => {
     if (!isOpen) return;
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
     let isMounted = true;
     (async () => {
       setFetching(true);
@@ -185,9 +192,10 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
     setAppointmentDate(dateStr);
 
     return () => {
+      window.removeEventListener('keydown', handleKeyDown);
       isMounted = false;
     };
-  }, [isOpen, defaultPatientId]);
+  }, [isOpen, defaultPatientId, onClose]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -336,13 +344,29 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
     setTimeout(() => setCopied(false), 3000);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl rounded-3xl bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className="relative w-full max-w-xl rounded-3xl bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* SUCCESS CONFIRMATION SCREEN */}
         {confirmedData ? (
-          <div className="text-center py-4 space-y-5 animate-in zoom-in-95">
+          <div className="text-center py-4 space-y-5 animate-in zoom-in-95 relative">
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-0 right-0 rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 transition cursor-pointer"
+              aria-label="Close modal"
+            >
+              <X className="h-5 w-5" />
+            </button>
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 shadow-md">
               <CheckCircle2 className="h-10 w-10" />
             </div>
@@ -390,15 +414,17 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
 
             <div className="flex gap-3 pt-2">
               <button
+                type="button"
                 onClick={copyConfirmation}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 transition"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 transition cursor-pointer"
               >
                 {copied ? <Check className="h-4 w-4 text-blue-600" /> : <Copy className="h-4 w-4 text-blue-600" />}
                 <span>{copied ? 'Details Copied!' : 'Copy Confirmation Details'}</span>
               </button>
               <button
+                type="button"
                 onClick={onClose}
-                className="flex-1 inline-flex items-center justify-center rounded-xl bg-blue-600 py-3 text-xs font-extrabold text-white shadow hover:bg-blue-700 transition"
+                className="flex-1 inline-flex items-center justify-center rounded-xl bg-blue-600 py-3 text-xs font-extrabold text-white shadow hover:bg-blue-700 transition cursor-pointer"
               >
                 Done
               </button>
@@ -418,8 +444,10 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
                 </div>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 transition"
+                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 transition cursor-pointer"
+                aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
               </button>
