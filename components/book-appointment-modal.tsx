@@ -23,6 +23,7 @@ import {
   Check
 } from 'lucide-react';
 import { requestCurrentPosition, reverseGeocodeClient } from '@/lib/location/geolocation';
+import { getIndianStates, getDistrictsForState } from '@/lib/location/india-phc-database';
 
 interface BookAppointmentModalProps {
   isOpen: boolean;
@@ -62,7 +63,11 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
   // Location & Nearest PHC state
   const [locationDetecting, setLocationDetecting] = useState(false);
   const [nearestPHCInfo, setNearestPHCInfo] = useState<{ id: string; name: string; distanceKm: number } | null>(null);
-  const [nearbyList, setNearbyList] = useState<Array<{ id: string; name: string; distanceKm: number; village?: string | null }>>([]);
+  const [nearbyList, setNearbyList] = useState<Array<{ id: string; name: string; distanceKm: number; village?: string | null; state?: string | null; district?: string | null }>>([]);
+  
+  // Manual State & District Filter
+  const [modalState, setModalState] = useState('');
+  const [modalDistrict, setModalDistrict] = useState('');
 
   // Appointment details
   const [doctorId, setDoctorId] = useState('');
@@ -598,6 +603,30 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
                   </div>
                 )}
 
+                {/* State -> District filter controls */}
+                <div className="grid grid-cols-2 gap-2 my-1">
+                  <select
+                    value={modalState}
+                    onChange={(e) => {
+                      setModalState(e.target.value);
+                      setModalDistrict('');
+                    }}
+                    className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none"
+                  >
+                    <option value="">All Indian States</option>
+                    {getIndianStates().map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+
+                  <select
+                    value={modalDistrict}
+                    onChange={(e) => setModalDistrict(e.target.value)}
+                    className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none"
+                  >
+                    <option value="">All Districts</option>
+                    {getDistrictsForState(modalState).map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+
                 <select
                   value={facilityId}
                   onChange={(e) => {
@@ -615,14 +644,17 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
                   }}
                   className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition"
                 >
-                  {(nearbyList.length > 0 ? nearbyList : facilities).map((f, i) => {
-                    const distStr = (f as any).distanceKm != null ? ` (${(f as any).distanceKm} km away${i === 0 ? ' — Nearest' : ''})` : ` (${f.village || 'PHC Center'})`;
-                    return (
-                      <option key={f.id} value={f.id}>
-                        {f.name}{distStr}
-                      </option>
-                    );
-                  })}
+                  {(nearbyList.length > 0 ? nearbyList : facilities)
+                    .filter(f => !modalState || (f as any).state?.toLowerCase() === modalState.toLowerCase())
+                    .filter(f => !modalDistrict || (f as any).district?.toLowerCase() === modalDistrict.toLowerCase())
+                    .map((f, i) => {
+                      const distStr = (f as any).distanceKm != null ? ` (${(f as any).distanceKm} km away${i === 0 ? ' — Nearest' : ''})` : ` (${f.village || f.district || 'PHC Center'})`;
+                      return (
+                        <option key={f.id} value={f.id}>
+                          {f.name}{distStr}
+                        </option>
+                      );
+                    })}
                 </select>
               </div>
 

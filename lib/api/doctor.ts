@@ -832,21 +832,29 @@ export async function getFacilities(): Promise<Facility[]> {
       .from('facilities')
       .select('*')
       .order('name');
-    if (error) {
-      console.error('Supabase getFacilities error:', error);
-      throw error;
+    
+    const { NATIONWIDE_PHC_DATASET } = await import('@/lib/location/india-phc-database');
+    const fallbackList = NATIONWIDE_PHC_DATASET as unknown as Facility[];
+
+    if (error || !data || data.length === 0) {
+      return fallbackList;
     }
-    return (data ?? []) as Facility[];
+
+    const map = new Map<string, Facility>();
+    fallbackList.forEach(f => map.set(f.id, f));
+    (data as Facility[]).forEach(f => map.set(f.id, f));
+    return Array.from(map.values());
   } catch (err) {
     console.error('getFacilities failed:', err);
-    return [];
+    const { NATIONWIDE_PHC_DATASET } = await import('@/lib/location/india-phc-database');
+    return NATIONWIDE_PHC_DATASET as unknown as Facility[];
   }
 }
 
 export async function getNearbyFacilities(
   latitude: number,
   longitude: number,
-  limit = 10
+  limit = 15
 ): Promise<import('@/lib/location/types').NearbyFacilityResult[]> {
   const { haversineDistanceKm } = await import('@/lib/location/distance');
   const facilities = await getFacilities();
