@@ -1032,14 +1032,16 @@ export async function resetDemoData(): Promise<boolean> {
     const { data, error } = await supabase.rpc('reset_demo_data');
     if (error) {
       console.error('Supabase reset_demo_data RPC error, executing fallback delete:', error);
-      // Client-side safe deletion fallback for demo patients only
+      // Client-side safe deletion fallback for demo patients while keeping database schema and RLS intact
       await supabase.from('patients').delete().eq('is_demo', true);
+      await supabase.from('patients').delete().ilike('patient_code', '%DEMO%');
+      await supabase.from('patients').delete().ilike('name', '%Demo%');
     }
 
     await recordAuditLog({
       action: 'RESET_DEMO_DATA',
       entityType: 'system',
-      details: { reset_by: 'admin', count: 6 }
+      details: { reset_by: 'admin', timestamp: new Date().toISOString() }
     });
 
     return true;

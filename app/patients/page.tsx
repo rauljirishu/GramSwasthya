@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { supabase } from '@/lib/supabase/client';
-import { Plus, Search, ShieldCheck, X, User } from 'lucide-react';
+import { Plus, Search, ShieldCheck, X, User, RotateCcw } from 'lucide-react';
+import { resetDemoData } from '@/lib/api/doctor';
 
 type Patient = {
   id: string;
@@ -62,6 +63,20 @@ export default function Patients() {
   useEffect(() => {
     load();
   }, []);
+
+  async function handleResetDemo() {
+    if (!confirm('Are you sure you want to reset demo patient records? This will clear old demo data so you can create fresh records.')) return;
+    setBusy(true);
+    try {
+      await resetDemoData();
+      setMessage('Demo patient records reset. You can now create fresh patient data!');
+      await load();
+    } catch (err) {
+      setMessage('Reset failed. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const patients = useMemo(() => {
     return all.filter(p => {
@@ -144,9 +159,14 @@ export default function Patients() {
           <h1 className="mt-1 text-3xl font-black">Patients Directory</h1>
           <p className="mt-1 text-sm text-slate-600">Official patient records tracked by unique Patient ID (PID).</p>
         </div>
-        <button onClick={() => setShow(true)} className="primary-btn">
-          <Plus className="h-4 w-4" /> Register New Patient
-        </button>
+        <div className="flex gap-2">
+          <button onClick={handleResetDemo} disabled={busy} className="secondary-btn text-xs">
+            <RotateCcw className="h-4 w-4 text-blue-600" /> Reset Demo Data
+          </button>
+          <button onClick={() => setShow(true)} className="primary-btn">
+            <Plus className="h-4 w-4" /> Register New Patient
+          </button>
+        </div>
       </header>
 
       <div className="mt-5 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs font-semibold text-blue-900">

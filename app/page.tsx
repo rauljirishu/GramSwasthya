@@ -40,7 +40,14 @@ export default function Home() {
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-600 text-2xl text-white shadow-md shadow-blue-500/20">+</span>
           GramCare
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] px-4 py-2.5 text-sm font-extrabold text-white shadow-md transition-all"
+          >
+            <Calendar className="h-4 w-4" />
+            <span>Book Appointment</span>
+          </button>
           <Link href="/login" className="secondary-btn py-2.5 text-sm">Sign in</Link>
           <Link href="/signup" className="primary-btn py-2.5 text-sm">Create account</Link>
         </div>

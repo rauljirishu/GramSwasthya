@@ -96,6 +96,7 @@ export interface Patient extends SyncMetadata {
   womens_health?: WomensHealthInfo | null;
   child_health?: ChildHealthInfo | null;
   registered_by?: string;
+  verification_status?: string | null;
   created_at: string;
 }
 
