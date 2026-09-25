@@ -1,166 +1,84 @@
-export type SupportedLanguage = 'en' | 'hi';
+export type SupportedLanguage = 'en' | 'hi' | 'gu' | 'mr';
 
 export interface TranslationDictionary {
   [key: string]: {
     en: string;
     hi: string;
+    gu: string;
+    mr: string;
   };
 }
 
 export const translations: TranslationDictionary = {
   // Brand & Shell
-  appName: { en: 'GramCare', hi: 'ग्रामकेयर' },
-  appTagline: { en: 'Rural Healthcare Platform', hi: 'ग्रामीण स्वास्थ्य सेवा मंच' },
-  doctorPortal: { en: 'Doctor & Clinical Portal', hi: 'चिकित्सक और नैदानिक पोर्टल' },
-  adminPortal: { en: 'Health Admin Control Center', hi: 'स्वास्थ्य प्रशासन नियंत्रण केंद्र' },
-  hospitalPortal: { en: 'Hospital Referral & Emergency Care Portal', hi: 'अस्पताल रेफरल और आपातकालीन देखभाल पोर्टल' },
-  
+  appName: { en: 'GramCare', hi: 'ग्रामकेयर', gu: 'ગ્રામકેર', mr: 'ग्रामकेअर' },
+  appTagline: { en: 'Connected Healthcare for Rural Communities', hi: 'ग्रामीण समुदायों के लिए कनेक्टेड स्वास्थ्य सेवा', gu: 'ગ્રામીણ સમુદાયો માટે કનેક્ટેડ હેલ્થકેર', mr: 'ग्रामीण समुदायांसाठी कनेक्टेड आरोग्य सेवा' },
+  centralAuthority: { en: 'Central Authority', hi: 'केंद्रीय प्राधिकरण', gu: 'સેન્ટ્રલ ઓથોરિટી', mr: 'केंद्रीय प्राधिकरण' },
+  phcHead: { en: 'PHC Head', hi: 'पीएचसी प्रमुख', gu: 'પીએચસી વડા', mr: 'पीएचसी प्रमुख' },
+  phcWorker: { en: 'PHC Worker / ASHA', hi: 'पीएचसी कार्यकर्ता / आशा', gu: 'પીએચસી કાર્યકર / આશા', mr: 'पीएचसी कार्यकर्ता / आशा' },
+  patientUser: { en: 'Patient', hi: 'मरीज़', gu: 'દર્દી', mr: 'रुग्ण' },
+
   // Navigation Items
-  navDashboard: { en: 'Doctor Dashboard', hi: 'डैशबोर्ड' },
-  navPatients: { en: 'Patient Records', hi: 'मरीज़ रिकॉर्ड' },
-  navHighRisk: { en: 'High-Risk Triage', hi: 'उच्च जोखिम ट्रायेज' },
-  navReferrals: { en: 'Digital Referrals', hi: 'डिजिटल रेफरल' },
-  navHospital: { en: 'Hospital Portal', hi: 'अस्पताल पोर्टल' },
-  navAppointments: { en: 'Appointments', hi: 'अपॉइंटमेंट' },
-  navDoctors: { en: 'Doctors Directory', hi: 'चिकित्सक सूची' },
-  navFacilities: { en: 'Facilities', hi: 'स्वास्थ्य केंद्र' },
-  navFollowUps: { en: 'Follow-up Tasks', hi: 'फॉलो-अप कार्य' },
-  navWorkspace: { en: 'ASHA Mobile Intake', hi: 'आशा मोबाइल इनटेक' },
-  navAnalytics: { en: 'Health Analytics', hi: 'स्वास्थ्य विश्लेषण' },
-  navProfile: { en: 'User Profile', hi: 'प्रोफ़ाइल' },
-  navSettings: { en: 'Settings', hi: 'सेटिंग्स' },
-  navSignOut: { en: 'Sign Out', hi: 'लॉग आउट' },
+  navDashboard: { en: 'Dashboard', hi: 'डैशबोर्ड', gu: 'ડેશબોર્ડ', mr: 'डॅशबोर्ड' },
+  navAppointments: { en: 'Appointments', hi: 'अपॉइंटमेंट', gu: 'એપોઇન્ટમેન્ટ્સ', mr: 'अपॉइंटमेंट्स' },
+  navPatients: { en: 'Patients Directory', hi: 'मरीज़ सूची', gu: 'દર્દીઓની યાદી', mr: 'रुग्ण डिरेक्टरी' },
+  navReferrals: { en: 'Inter-Facility Referrals', hi: 'इंटर-फैसिलिटी रेफरल', gu: 'ઇન્ટર-ફેસિલીટી રેફરલ', mr: 'इंटर-फॅसिलिटी रेफरल्स' },
+  navFollowUps: { en: 'Follow-ups', hi: 'फॉलो-अप', gu: 'ફોલો-અપ્સ', mr: 'फॉलो-अप्स' },
+  navMaternalCare: { en: 'Maternal Care', hi: 'मातृ देखभाल', gu: 'માતૃ સંભાળ', mr: 'माता काळजी' },
+  navHealthEducation: { en: 'Health Guidance', hi: 'स्वास्थ्य मार्गदर्शन', gu: 'આરોગ્ય માર્ગદર્શન', mr: 'आरोग्य मार्गदर्शन' },
+  navMap: { en: 'Nearby Care Map', hi: 'निकटतम स्वास्थ्य केंद्र नक्शा', gu: 'નજીકના આરોગ્ય કેન્દ્રો', mr: 'जवळपासची आरोग्य केंद्रे' },
+  navWorkers: { en: 'Worker Management', hi: 'कार्यकर्ता प्रबंधन', gu: 'કાર્યકર સંચાલન', mr: 'कार्यकर्ते व्यवस्थापन' },
+  navNotifications: { en: 'Reminders & Notifications', hi: 'रिमाइंडर और सूचनाएं', gu: 'રિમાઇન્ડર્સ અને સૂચનાઓ', mr: 'रिमाइंडर्स आणि सूचना' },
+  navSignOut: { en: 'Sign Out', hi: 'लॉग आउट', gu: 'સાઇન આઉટ', mr: 'साइन आउट' },
 
   // Dashboard Headings & Metric Labels
-  goodDay: { en: 'Good day', hi: 'शुभ दिन' },
-  dashboardSubtitle: { en: 'Real-time rural healthcare triage, digital referrals, and AI-assisted risk prioritization.', hi: 'वास्तविक समय ग्रामीण स्वास्थ्य सेवा ट्रायेज, डिजिटल रेफरल और एआई-सहायता प्राप्त जोखिम प्राथमिकता।' },
-  totalPatients: { en: 'Total Patients', hi: 'कुल मरीज़' },
-  newPatientsThisWeek: { en: 'New Patients This Week', hi: 'इस सप्ताह नए मरीज़' },
-  criticalPatients: { en: 'Critical Patients', hi: 'गंभीर स्थिति मरीज़' },
-  highRiskPatients: { en: 'High-Risk Patients', hi: 'उच्च जोखिम वाले मरीज़' },
-  pendingReferrals: { en: 'Pending Referrals', hi: 'लंबित रेफरल' },
-  activeFollowUps: { en: 'Active Follow-ups', hi: 'सक्रिय फॉलो-अप' },
-  missedFollowUps: { en: 'Missed Follow-ups', hi: 'छूटे हुए फॉलो-अप' },
-  priorityPatients: { en: 'Priority Patient Triage (Sorted by Risk)', hi: 'प्राथमिकता मरीज़ ट्रायेज (जोखिम अनुसार)' },
+  dashboardTitle: { en: 'Connected care for every village.', hi: 'हर गाँव के लिए कनेक्टेड देखभाल।', gu: 'દરેક ગામ માટે કનેક્ટેડ સંભાળ.', mr: 'प्रत्येक गावासाठी जोडलेली काळजी.' },
+  dashboardDesc: { en: 'GramCare supports secure healthcare continuity from field registration through clinical review, appointment booking, referral, treatment and follow-up.', hi: 'ग्रामकेयर क्षेत्र पंजीकरण से लेकर नैदानिक समीक्षा, अपॉइंटमेंट बुकिंग, रेफरल, उपचार और फॉलो-अप तक सुरक्षित स्वास्थ्य सेवा की निरंतरता का समर्थन करता है।', gu: 'ગ્રામકેર ક્ષેત્ર સંગ્રહથી લઇ ક્લિનિકલ સમીક્ષા, એપોઇન્ટમેન્ટ બુકિંગ, રેફરલ, ઉપચાર અને ફોલો-અપ સુધી સુરક્ષિત આરોગ્યસંભાળની નિરંતરતાને સપોર્ટ કરે છે.', mr: 'ग्रामकेअर क्षेत्र नोंदणीपासून क्लिनिकल पुनरावलोकन, अपॉइंटमेंट बुकिंग, संदर्भ, उपचार आणि फॉलो-अप पर्यंत सुरक्षित आरोग्य सेवा सलगतेला पाठिंबा देते.' },
+  bookAppointmentBtn: { en: 'Book Appointment', hi: 'अपॉइंटमेंट बुक करें', gu: 'એપોઇન્ટમેન્ટ બુક કરો', mr: 'अपॉइंटमेंट बुक करा' },
+  bookAppointmentNoLogin: { en: 'Book Appointment (No Login)', hi: 'अपॉइंटमेंट बुक करें (बिना लॉगिन)', gu: 'એપોઇન્ટમેન્ટ બુક કરો (વગર લોગિન)', mr: 'अपॉइंटमेंट बुक करा (लॉगिनशिवाय)' },
+  createAccountBtn: { en: 'Create Account', hi: 'खाता बनाएं', gu: 'ખાતું બનાવો', mr: 'खाते तयार करा' },
+  signInBtn: { en: 'Sign In', hi: 'साइन इन करें', gu: 'સાઇન ઇન', mr: 'साइन इन करा' },
 
-  // Hospital Dashboard Labels
-  incomingReferrals: { en: 'Incoming Referrals', hi: 'आगमन रेफरल' },
-  urgentReferrals: { en: 'Urgent Referrals', hi: 'आपातकालीन रेफरल' },
-  acceptedReferrals: { en: 'Accepted Referrals', hi: 'स्वीकृत रेफरल' },
-  inTransitPatients: { en: 'Patients in Transit', hi: 'रास्ते में मरीज़' },
-  arrivedPatients: { en: 'Arrived Patients', hi: 'पहुंचे हुए मरीज़' },
-  treatmentStarted: { en: 'Treatment Started', hi: 'इलाज शुरू' },
-  completedReferrals: { en: 'Completed Referrals', hi: 'पूर्ण रेफरल' },
-  acceptReferral: { en: 'Accept Referral', hi: 'रेफरल स्वीकार करें' },
-  rejectReferral: { en: 'Reject Referral', hi: 'रेफरल अस्वीकार करें' },
-  markInTransit: { en: 'Mark In Transit (108 Ambulance)', hi: 'रास्ते में दर्ज करें (108 एम्बुलेंस)' },
-  markArrived: { en: 'Mark Patient Arrived', hi: 'मरीज़ आगमन दर्ज करें' },
-  startTreatment: { en: 'Start Clinical Treatment', hi: 'इलाज शुरू करें' },
-  completeTreatment: { en: 'Complete & Discharge', hi: 'इलाज पूर्ण और डिस्चार्ज' },
+  // AI Risk Triage Levels
+  riskLow: { en: 'Low Risk 🟢', hi: 'कम जोखिम 🟢 (Low)', gu: 'ઓછું જોખમ 🟢 (Low)', mr: 'कमी धोका 🟢 (Low)' },
+  riskMedium: { en: 'Medium Risk 🟡', hi: 'मध्यम जोखिम 🟡 (Medium)', gu: 'મધ્યમ જોખમ 🟡 (Medium)', mr: 'मध्यम धोका 🟡 (Medium)' },
+  riskHigh: { en: 'High Risk 🔴', hi: 'उच्च जोखिम 🔴 (High)', gu: 'ઉચ્ચ જોખમ 🔴 (High)', mr: 'उच्च धोका 🔴 (High)' },
+  riskCritical: { en: 'Critical Escalation 🔴', hi: 'अत्यंत गंभीर 🔴 (Critical)', gu: 'અત્યંત ગંભીર 🔴 (Critical)', mr: 'अत्यंत गंभीर 🔴 (Critical)' },
 
-  // Clinical Actions & Filters
-  searchPlaceholder: { en: 'Search name or village…', hi: 'नाम या गाँव से खोजें…' },
-  allRiskLevels: { en: 'All Risk Levels', hi: 'सभी जोखिम स्तर' },
-  allVillages: { en: 'All Villages', hi: 'सभी गाँव' },
-  allGenders: { en: 'All Genders', hi: 'सभी लिंग' },
-  filterAll: { en: 'All', hi: 'सभी' },
-  filterCritical: { en: 'Critical', hi: 'गंभीर' },
-  filterHigh: { en: 'High Risk', hi: 'उच्च जोखिम' },
-  filterMedium: { en: 'Medium Risk', hi: 'मध्यम जोखिम' },
-  filterLow: { en: 'Low Risk', hi: 'कम जोखिम' },
-  actionRefer: { en: 'Refer Patient', hi: 'रेफर करें' },
-  actionViewChart: { en: 'View Chart', hi: 'चार्ट देखें' },
-  actionCreateReferral: { en: 'Create Referral', hi: 'रेफरल बनाएं' },
-  actionRecordVitals: { en: 'Record Vitals', hi: 'वाइटल्स दर्ज करें' },
+  // Metric Card Titles
+  totalPHCs: { en: 'Total PHCs', hi: 'कुल पीएचसी', gu: 'કુલ પીએચસી', mr: 'एकूण पीएचसी' },
+  healthcareWorkers: { en: 'Healthcare Workers', hi: 'स्वास्थ्य कार्यकर्ता', gu: 'આરોગ્ય કાર્યકરો', mr: 'आरोग्य कार्यकर्ते' },
+  hospitalsCount: { en: 'Hospitals', hi: 'अस्पताल', gu: 'હોસ્પિટલો', mr: 'रुग्णालये' },
+  registeredPatients: { en: 'Registered Patients (PID)', hi: 'पंजीकृत मरीज़ (PID)', gu: 'નોંધાયેલા દર્દીઓ (PID)', mr: 'नोंदणीकृत रुग्ण (PID)' },
+  activeReferrals: { en: 'Active Referrals', hi: 'सक्रिय रेफरल', gu: 'સક્રિય રેફરલ્સ', mr: 'सक्रिय संदर्भ' },
+  followUpsDue: { en: 'Follow-ups Due', hi: 'देय फॉलो-अप', gu: 'બાકી ફોલો-અપ્સ', mr: 'बाकी फॉलो-अप्स' },
 
-  // Triage Levels & Status Badges
-  riskCritical: { en: 'CRITICAL', hi: 'गंभीर (Critical)' },
-  riskHigh: { en: 'HIGH RISK', hi: 'उच्च जोखिम (High Risk)' },
-  riskMedium: { en: 'MEDIUM RISK', hi: 'मध्यम जोखिम (Medium Risk)' },
-  riskLow: { en: 'LOW RISK', hi: 'कम जोखिम (Low Risk)' },
-  statusPending: { en: 'Pending', hi: 'लंबित' },
-  statusAccepted: { en: 'Accepted', hi: 'स्वीकृत' },
-  statusInTransit: { en: 'In Transit', hi: 'रास्ते में' },
-  statusArrived: { en: 'Arrived', hi: 'पहुंच गए' },
-  statusCompleted: { en: 'Completed', hi: 'पूर्ण' },
-  statusMissed: { en: 'Missed', hi: 'छूटा हुआ' },
-  statusUpcoming: { en: 'Upcoming', hi: 'आगामी' },
+  // Patients Directory
+  patientsDirectory: { en: 'Patients Directory', hi: 'मरीज़ निर्देशिका', gu: 'દર્દીઓની ડિરેક્ટરી', mr: 'रुग्ण डिरेक्टरी' },
+  patientPIDText: { en: 'Official patient records tracked by unique Patient ID (PID).', hi: 'अनूठे पेशेंट आईडी (PID) द्वारा ट्रैक किए गए आधिकारिक मरीज़ रिकॉर्ड।', gu: 'અનન્ય પેશન્ટ આઇડી (PID) દ્વારા ટ્રેક કરાયેલા સત્તાવાર દર્દી રેકોર્ડ્સ.', mr: 'युनिक पेशंट आयडी (PID) द्वारे मागोवा घेतलेली अधिकृत रुग्ण नोंदणी.' },
+  registerNewPatient: { en: 'Register New Patient', hi: 'नया मरीज़ पंजीकृत करें', gu: 'નવા દર્દીની નોંધણી કરો', mr: 'नवीन रुग्णाची नोंदणी करा' },
+  resetDemoData: { en: 'Reset Demo Data', hi: 'डेमो डेटा रीसेट करें', gu: 'ડેમો ડેટા રીસેટ કરો', mr: 'डेमो डेटा रीसेट करा' },
+  searchPatientPlaceholder: { en: 'Search Name, PID (e.g. GC-2026-1001) or Village...', hi: 'नाम, PID (जैसे GC-2026-1001) या गाँव खोजें...', gu: 'નામ, PID (જેમ કે GC-2026-1001) અથવા ગામ શોધો...', mr: 'नाव, PID (उदा. GC-2026-1001) किंवा गाव शोधा...' },
 
-  // Profile Section Headers & Labels
-  profileTitle: { en: 'User Profile', hi: 'उपयोगकर्ता प्रोफ़ाइल' },
-  profileSubtitle: { en: 'Manage your personal, professional, and facility account information.', hi: 'अपनी व्यक्तिगत, पेशेवर और स्वास्थ्य केंद्र प्रोफ़ाइल जानकारी प्रबंधित करें।' },
-  personalInfo: { en: 'Personal Information', hi: 'व्यक्तिगत जानकारी' },
-  professionalInfo: { en: 'Professional Information', hi: 'पेशेवर जानकारी' },
-  accountInfo: { en: 'Account & Security Information', hi: 'खाता और सुरक्षा जानकारी' },
-  editProfile: { en: 'Edit Profile', hi: 'प्रोफ़ाइल संपादित करें' },
-  saveChanges: { en: 'Save Changes', hi: 'बदलाव सहेजें' },
-  cancel: { en: 'Cancel', hi: 'रद्द करें' },
-  fullName: { en: 'Full Name', hi: 'पूरा नाम' },
-  email: { en: 'Email Address', hi: 'ईमेल पता' },
-  phone: { en: 'Phone Number', hi: 'फ़ोन नंबर' },
-  gender: { en: 'Gender', hi: 'लिंग' },
-  dob: { en: 'Date of Birth', hi: 'जन्म तिथि' },
-  address: { en: 'Address', hi: 'पता' },
-  city: { en: 'City', hi: 'शहर' },
-  state: { en: 'State', hi: 'राज्य' },
-  pincode: { en: 'PIN Code', hi: 'पिन कोड' },
-  role: { en: 'Role', hi: 'भूमिका' },
-  staffId: { en: 'Employee / Staff ID', hi: 'कर्मचारी आईडी' },
-  facility: { en: 'Health Facility / PHC', hi: 'स्वास्थ्य केंद्र / पीएचसी' },
-  department: { en: 'Department', hi: 'विभाग' },
-  designation: { en: 'Designation', hi: 'पद' },
-  assignedArea: { en: 'Assigned Village / Area', hi: 'आवंटित गाँव / क्षेत्र' },
-  joiningDate: { en: 'Joining Date', hi: 'शामिल होने की तिथि' },
-  accountStatus: { en: 'Account Status', hi: 'खाता स्थिति' },
-  lastLogin: { en: 'Last Login', hi: 'अंतिम लॉगिन' },
+  // Patient Profile & Reports
+  patientProfile: { en: 'Patient Record & Reports', hi: 'मरीज़ रिकॉर्ड और रिपोर्ट', gu: 'દર્દી રેકોર્ડ અને રિપોર્ટ્સ', mr: 'रुग्ण नोंदणी व अहवाल' },
+  patientReportsTab: { en: 'Patient Reports & Documents', hi: 'मरीज़ रिपोर्ट और दस्तावेज़', gu: 'દર્દી રિપોર્ટ્સ અને દસ્તાવેજો', mr: 'रुग्ण अहवाल आणि कागदपत्रे' },
+  addReportBtn: { en: 'Add Medical Report', hi: 'मेडिकल रिपोर्ट जोड़ें', gu: 'મેડિકલ રિપોર્ટ ઉમેરો', mr: 'वैद्यकीय अहवाल जोडा' },
+  recordVitalsBtn: { en: 'Record Vitals & Triage', hi: 'वाइटल्स और ट्रायेज दर्ज करें', gu: 'વાયટલ્સ અને ટ્રાયજ નોંધો', mr: 'व्हाइटल्स आणि ट्रायज नोंदवा' },
+  readOnlyNotice: { en: 'Read-Only Patient Record — Patients cannot modify clinical entries.', hi: 'केवल पढ़ने योग्य मरीज़ रिकॉर्ड — मरीज़ नैदानिक प्रविष्टियों को संशोधित नहीं कर सकते।', gu: 'ફક્ત વાંચવા માટેનો દર્દી રેકોર્ડ — દર્દીઓ ક્લિનિકલ એન્ટ્રીઓ બદલી શકતા નથી.', mr: 'फक्त वाचण्यासाठी रुग्ण नोंद — रुग्ण क्लिनिकल नोंदी बदलू शकत नाहीत.' },
 
-  // Settings Section Headers & Labels
-  settingsTitle: { en: 'Settings & Preferences', hi: 'सेटिंग्स और प्राथमिकताएं' },
-  settingsSubtitle: { en: 'Customize appearance, language, accessibility scaling, and notification preferences.', hi: 'उपस्थिति, भाषा, पहुंच (Accessibility) और अधिसूचना सेटिंग्स को अनुकूलित करें।' },
-  tabAppearance: { en: 'Appearance & Theme', hi: 'दिखावट और थीम' },
-  tabLanguage: { en: 'Language & Region', hi: 'भाषा और क्षेत्र' },
-  tabAccessibility: { en: 'Accessibility Scaling', hi: 'पहुंच और टेक्स्ट आकार' },
-  tabNotifications: { en: 'Notifications', hi: 'अधिसूचनाएं' },
-  tabPrivacy: { en: 'Privacy & Security', hi: 'गोपनीयता और सुरक्षा' },
-  tabAccount: { en: 'Account Security', hi: 'खाता सुरक्षा' },
+  // Referrals
+  referralsTitle: { en: 'Inter-Facility Referrals', hi: 'इंटर-फैसिलिटी रेफरल', gu: 'ઇન્ટર-ફેસિલીટી રેફરલ', mr: 'इंटर-फॅसिलिटी रेफरल्स' },
+  lookupByPIDTitle: { en: 'Find Patient Medical Details by PID', hi: 'PID द्वारा मरीज़ के चिकित्सा विवरण खोजें', gu: 'PID દ્વારા દર્દીની મેડિકલ વિગતો શોધો', mr: 'PID द्वारे रुग्णाची वैद्यकीय माहिती शोधा' },
+  enterPIDPlaceholder: { en: 'Enter PID (e.g. GC-2026-1001)...', hi: 'PID दर्ज करें (जैसे GC-2026-1001)...', gu: 'PID દાખલ કરો (જેમ કે GC-2026-1001)...', mr: 'PID प्रविष्ट करा (उदा. GC-2026-1001)...' },
+  lookupBtn: { en: 'Lookup PID', hi: 'PID खोजें', gu: 'PID શોધો', mr: 'PID शोधा' },
+  createReferralBtn: { en: 'Create New Referral', hi: 'नया रेफरल बनाएं', gu: 'નવું રેફરલ બનાવો', mr: 'नवीन संदर्भ तयार करा' },
 
-  // Theme & Appearance
-  themeHeading: { en: 'Global Application Theme', hi: 'ग्लोबल एप्लिकेशन थीम' },
-  themeDesc: { en: 'Choose between Light, Dark, or System automatic theme styling.', hi: 'लाइट, डार्क या सिस्टम स्वचालित थीम के बीच चयन करें।' },
-  themeLight: { en: 'Light Theme', hi: 'लाइट थीम (Light)' },
-  themeDark: { en: 'Dark Theme', hi: 'डार्क थीम (Dark Navy)' },
-  themeSystem: { en: 'System Default', hi: 'सिस्टम डिफ़ॉल्ट (System)' },
-
-  // Language Section
-  languageHeading: { en: 'Select Primary Language', hi: 'प्राथमिक भाषा चुनें' },
-  languageDesc: { en: 'Changes will apply instantly across all pages, forms, and navigation menus.', hi: 'बदलाव तुरंत सभी पृष्ठों, फॉर्मों और नेविगेशन मेनू में लागू होंगे।' },
-  englishLabel: { en: 'English', hi: 'English (अंग्रेज़ी)' },
-  hindiLabel: { en: 'हिन्दी (Hindi)', hi: 'हिन्दी (Hindi)' },
-  futureLanguages: { en: 'Additional regional languages coming soon: Gujarati, Marathi, Bengali, Tamil, Telugu.', hi: 'अन्य क्षेत्रीय भाषाएं जल्द आ रही हैं: गुजराती, मराठी, बंगाली, तमिल, तेलुगु।' },
-
-  // Accessibility Section
-  textSizeHeading: { en: 'Text Size Scaling', hi: 'टेक्स्ट का आकार (Text Size)' },
-  sizeSmall: { en: 'Small (0.95x)', hi: 'छोटा (0.95x)' },
-  sizeDefault: { en: 'Default (1.0x)', hi: 'सामान्य (1.0x)' },
-  sizeLarge: { en: 'Large (1.10x)', hi: 'बड़ा (1.10x)' },
-  sizeXLarge: { en: 'Extra Large (1.20x)', hi: 'अति बड़ा (1.20x)' },
-  highContrastHeading: { en: 'High Contrast Mode', hi: 'उच्च कंट्रास्ट मोड (High Contrast)' },
-  highContrastDesc: { en: 'Increases border definition and text contrast for low-vision readability.', hi: 'कम दृष्टि वाले उपयोगकर्ताओं के लिए बॉर्डर और टेक्स्ट कंट्रास्ट को बढ़ाता है।' },
-  reducedMotionHeading: { en: 'Reduced Motion', hi: 'कम मोशन (Reduced Motion)' },
-  reducedMotionDesc: { en: 'Disables UI transitions and subtle keyframe animations.', hi: 'यूआई ट्रांजिशन और एनिमेशन को बंद करता है।' },
-
-  // Notification Preferences
-  referralNotifs: { en: 'Referral Status Notifications', hi: 'रेफरल स्थिति की सूचनाएं' },
-  followUpNotifs: { en: 'Follow-up Reminders', hi: 'फॉलो-अप याद दिलाना' },
-  highRiskNotifs: { en: 'High-Risk Triage Alerts', hi: 'उच्च जोखिम ट्रायेज अलर्ट' },
-  systemNotifs: { en: 'System & Sync Notifications', hi: 'सिस्टम और सिंक सूचनाएं' },
-
-  // Privacy & Security
-  changePassword: { en: 'Change Password', hi: 'पासवर्ड बदलें' },
-  signOutAll: { en: 'Sign Out All Sessions', hi: 'सभी सत्रों से लॉग आउट करें' },
-  
-  // Feedback Messages
-  profileUpdatedSuccess: { en: 'Profile updated successfully.', hi: 'प्रोफ़ाइल सफलतापूर्वक अपडेट की गई।' },
-  profileUpdateFailed: { en: 'Unable to update profile. Please try again.', hi: 'प्रोफ़ाइल अपडेट करने में असमर्थ। कृपया पुनः प्रयास करें।' },
-  settingsSavedSuccess: { en: 'Settings and preferences saved successfully.', hi: 'सेटिंग्स और प्राथमिकताएं सफलतापूर्वक सहेजी गईं।' }
+  // Reminders & Notifications
+  remindersTitle: { en: 'Reminders & Notifications', hi: 'रिमाइंडर और सूचनाएं', gu: 'રિમાઇન્ડર્સ અને સૂચનાઓ', mr: 'रिमाइंडर्स आणि सूचना' },
+  appointmentReminders: { en: 'Appointment Reminders', hi: 'अपॉइंटमेंट रिमाइंडर', gu: 'એપોઇન્ટમેન્ટ રિમાઇન્ડર્સ', mr: 'अपॉइंटमेंट रिमाइंडर्स' },
+  emergencyAlerts: { en: 'PHC Emergency Alerts', hi: 'पीएचसी आपातकालीन अलर्ट', gu: 'પીએચસી કટોકટી ચેતવણીઓ', mr: 'पीएचसी आणीबाणी इशारे' },
+  prescriptionTimings: { en: 'Prescription Dosage Timings', hi: 'दवा खुराक का समय', gu: 'દવાના ડોઝનો સમય', mr: 'औषधांच्या वेळेचे वेळापत्रक' },
+  markAsTaken: { en: 'Mark as Taken', hi: 'दवा ली दर्ज करें', gu: 'લેવાઈ ગઈ નોંધો', mr: 'औषध घेतले नोंदवा' },
+  setAlarm: { en: 'Set Reminder Alarm', hi: 'रिमाइंडर अलार्म सेट करें', gu: 'રિમાઇન્ડર એલાર્મ સેટ કરો', mr: 'रिमाइंडर अलार्म सेट करा' }
 };

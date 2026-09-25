@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { ContinueDashboard } from '@/components/continue-dashboard';
 import { BookAppointmentModal } from '@/components/book-appointment-modal';
+import { LanguageSelector } from '@/components/language-selector';
 
 const capabilities = [
   [ShieldCheck, 'Patient Records & Unique PID', 'Longitudinal health information with unique PID identifiers and role-based access.'],

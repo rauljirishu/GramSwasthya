@@ -7,6 +7,7 @@ import { GramRole, roleLabels } from '@/lib/grams-data';
 import { currentRole } from '@/lib/auth';
 import { supabase } from '@/lib/supabase/client';
 import { syncEngine } from '@/lib/offline/sync-engine';
+import { LanguageSelector } from '@/components/language-selector';
 import { 
   Bell, 
   Calendar, 
@@ -190,17 +191,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span>{pending ? ` · Pending sync: ${pending}` : ' · All records synchronized'}</span>
           </div>
 
-          {/* Read-Only Authenticated User Badge & Notifications */}
+          {/* Read-Only Authenticated User Badge, Language Selector & Notifications */}
           <div className="ml-auto flex items-center gap-3">
+            <LanguageSelector />
+
             <Link
               href="/notifications"
-              className="rounded-xl border border-slate-200 dark:border-slate-700 p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-              title="Notifications"
+              className="relative rounded-xl border border-slate-200 dark:border-slate-700 p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              title="Reminders & Notifications"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span className="absolute -top-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-rose-600 text-[9px] font-black text-white">
+                3
+              </span>
             </Link>
 
-            {/* READ-ONLY ROLE BADGE: No dropdown, no unauthenticated role switching */}
+            {/* READ-ONLY ROLE BADGE */}
             <div className="flex items-center gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 px-3 py-1.5 border border-blue-200 dark:border-blue-800">
               <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <span className="text-xs font-extrabold text-blue-900 dark:text-blue-200">

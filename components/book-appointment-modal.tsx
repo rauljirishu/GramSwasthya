@@ -384,7 +384,7 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
                 onClick={copyConfirmation}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 transition"
               >
-                {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4 text-blue-600" />}
+                {copied ? <Check className="h-4 w-4 text-blue-600" /> : <Copy className="h-4 w-4 text-blue-600" />}
                 <span>{copied ? 'Details Copied!' : 'Copy Confirmation Details'}</span>
               </button>
               <button

@@ -285,7 +285,7 @@ export default function NotificationsPage() {
                       onClick={() => toggleMedication(item.id)}
                       className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold transition shadow-sm ${
                         item.taken 
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
+                          ? 'bg-blue-700 text-white hover:bg-blue-800' 
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
                     >

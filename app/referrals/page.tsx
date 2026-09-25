@@ -347,7 +347,7 @@ export default function ReferralsPage() {
                           {busyId === item.id ? 'Saving...' : `Mark ${nextStatus[item.status]?.replaceAll('_', ' ')}`}
                         </button>
                       ) : (
-                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1">
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center justify-end gap-1">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Completed
                         </span>
                       )}
