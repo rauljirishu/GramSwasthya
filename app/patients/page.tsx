@@ -73,6 +73,10 @@ export default function PatientsPage() {
 
   useEffect(() => { void load(); }, []);
 
+  useEffect(() => {
+    if (canRegister && new URLSearchParams(window.location.search).get('register') === '1') setShowForm(true);
+  }, [canRegister]);
+
   const patients = useMemo(() => all.filter(patient =>
     `${patient.name} ${patient.patient_code || ''} ${patient.village || ''} ${patient.district || ''}`
       .toLowerCase().includes(query.toLowerCase())
@@ -138,8 +142,8 @@ export default function PatientsPage() {
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="eyebrow">Authorised patient registry</p>
-            <h1 className="mt-2 text-3xl font-black">All Patient Data</h1>
-            <p className="mt-1 text-sm text-slate-600">Central Authority can review the complete patient registry across all PHCs.</p>
+            <h1 className="mt-2 text-3xl font-black">{['head', 'worker'].includes(role) ? 'My PHC Patient Registry' : 'All Patient Data'}</h1>
+            <p className="mt-1 text-sm text-slate-600">{['head', 'worker'].includes(role) ? 'Review and register patients assigned to your PHC. Patient visibility is limited by your facility access.' : 'Central Authority can review the complete patient registry across all PHCs.'}</p>
           </div>
           {canRegister && <button onClick={() => setShowForm(true)} className="primary-btn"><Plus className="h-4 w-4" />Register patient</button>}
         </header>

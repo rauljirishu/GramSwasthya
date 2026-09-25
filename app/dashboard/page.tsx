@@ -106,7 +106,7 @@ export default function Dashboard() {
   return (
     <DashboardShell>
       {role === 'central' && <CentralAuthorityDashboard profile={userProfile} />}
-      {role === 'head' && <PhcHeadDashboard profile={userProfile} />}
+      {role === 'head' && <PhcHeadDashboardLive profile={userProfile} />}
       {role === 'worker' && <PhcWorkerDashboard profile={userProfile} />}
       {role === 'doctor' && <PhcHeadDashboard profile={userProfile} />}
       {role === 'hospital' && <CentralAuthorityDashboard profile={userProfile} />}
@@ -944,6 +944,142 @@ function CentralAuthorityDashboard({ profile }: { profile: any }) {
 {/* ========================================================================= */}
 {/* 2. AREA / PHC HEAD DASHBOARD (Area Scoped Authority Only)                 */}
 {/* ========================================================================= */}
+type PhcRiskRow = { id: string; patient_id: string; risk_level: string; risk_score: number; assessed_at: string };
+type PhcFollowUpRow = { id: string; patient_id: string; scheduled_date: string; status: string; notes: string | null };
+type PhcReferralRow = { id: string; patient_id: string; reason: string; status: string; created_at: string; referred_to_text: string | null; clinical_notes: string | null };
+type PhcAppointmentRow = { id: string; patient_id: string; appointment_date: string; status: string; purpose: string | null };
+
+function PhcHeadDashboardLive({ profile }: { profile: any }) {
+  const [facility, setFacility] = useState<any>(null);
+  const [patients, setPatients] = useState<any[]>([]);
+  const [risks, setRisks] = useState<PhcRiskRow[]>([]);
+  const [appointments, setAppointments] = useState<PhcAppointmentRow[]>([]);
+  const [followUps, setFollowUps] = useState<PhcFollowUpRow[]>([]);
+  const [referrals, setReferrals] = useState<PhcReferralRow[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'patients' | 'appointments' | 'followups' | 'referrals'>('overview');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  async function loadData() {
+    setLoading(true);
+    setError('');
+    if (!profile?.facility_id) {
+      setFacility(null);
+      setPatients([]);
+      setRisks([]);
+      setAppointments([]);
+      setFollowUps([]);
+      setReferrals([]);
+      setError('This PHC Head account has no facility assigned. Ask Central Authority to assign your PHC.');
+      setLoading(false);
+      return;
+    }
+
+    const [facilityResult, patientResult] = await Promise.all([
+      supabase.from('facilities').select('id,name,code,address,village,district,state').eq('id', profile.facility_id).maybeSingle(),
+      supabase.from('patients').select('id,patient_code,name,age,gender,phone,village,district,next_follow_up_date,verification_status,created_at')
+        .eq('registered_phc_id', profile.facility_id).order('created_at', { ascending: false })
+    ]);
+    if (facilityResult.error) setError(`Could not load assigned PHC: ${facilityResult.error.message}`);
+    setFacility(facilityResult.data || null);
+    if (patientResult.error) {
+      setError(`Could not load this PHC's patient list: ${patientResult.error.message}`);
+      setPatients([]);
+      setRisks([]);
+      setAppointments([]);
+      setFollowUps([]);
+      setReferrals([]);
+      setLoading(false);
+      return;
+    }
+
+    const patientRows = patientResult.data || [];
+    setPatients(patientRows);
+    const patientIds = patientRows.map((patient: any) => patient.id);
+    if (!patientIds.length) {
+      setRisks([]); setAppointments([]); setFollowUps([]); setReferrals([]);
+      setLoading(false);
+      return;
+    }
+
+    const [riskResult, appointmentResult, followUpResult, referralResult] = await Promise.all([
+      supabase.from('risk_assessments').select('id,patient_id,risk_level,risk_score,assessed_at').in('patient_id', patientIds).order('assessed_at', { ascending: false }),
+      supabase.from('appointments').select('id,patient_id,appointment_date,status,purpose').eq('facility_id', profile.facility_id).in('patient_id', patientIds).order('appointment_date', { ascending: true }),
+      supabase.from('follow_ups').select('id,patient_id,scheduled_date,status,notes').in('patient_id', patientIds).order('scheduled_date', { ascending: true }),
+      supabase.from('referrals').select('id,patient_id,reason,status,created_at,referred_to_text,clinical_notes').in('patient_id', patientIds).order('created_at', { ascending: false })
+    ]);
+    const dataErrors = [riskResult.error, appointmentResult.error, followUpResult.error, referralResult.error].filter(Boolean);
+    if (dataErrors.length) setError(`Some PHC care lists could not be loaded: ${dataErrors.map(item => item?.message).join('; ')}`);
+    setRisks((riskResult.data || []) as PhcRiskRow[]);
+    setAppointments((appointmentResult.data || []) as PhcAppointmentRow[]);
+    setFollowUps((followUpResult.data || []) as PhcFollowUpRow[]);
+    setReferrals((referralResult.data || []) as PhcReferralRow[]);
+    setLoading(false);
+  }
+
+  useEffect(() => { void loadData(); }, [profile?.facility_id]);
+
+  const latestRisk = new Map<string, PhcRiskRow>();
+  for (const risk of risks) if (!latestRisk.has(risk.patient_id)) latestRisk.set(risk.patient_id, risk);
+  const patientById = new Map(patients.map(patient => [patient.id, patient]));
+  const today = new Date().toISOString().slice(0, 10);
+  const highRiskCount = [...latestRisk.values()].filter(item => item.risk_level.toLowerCase() === 'high').length;
+  const dueFollowUps = followUps.filter(item => item.scheduled_date <= today && item.status !== 'completed').length;
+  const upcomingAppointments = appointments.filter(item => item.appointment_date.slice(0, 10) >= today && !['completed', 'cancelled'].includes(item.status)).length;
+  const tabs = [
+    ['overview', 'Overview'], ['patients', `Patients (${patients.length})`], ['appointments', `Appointments (${appointments.length})`],
+    ['followups', `Follow-ups (${followUps.length})`], ['referrals', `Referrals (${referrals.length})`]
+  ] as const;
+  const riskBadge = (patientId: string) => {
+    const risk = latestRisk.get(patientId);
+    if (!risk) return <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">Not assessed</span>;
+    const tone = risk.risk_level.toLowerCase() === 'high' ? 'bg-rose-100 text-rose-800' : risk.risk_level.toLowerCase() === 'medium' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800';
+    return <span className={`rounded-full px-2.5 py-1 text-xs font-bold capitalize ${tone}`}>{risk.risk_level} · {risk.risk_score}</span>;
+  };
+  const patientLink = (patientId: string) => {
+    const patient = patientById.get(patientId);
+    return patient?.patient_code ? <Link className="font-bold text-blue-700 hover:underline" href={`/patients/${encodeURIComponent(patient.patient_code)}`}>{patient.name}<span className="mt-1 block text-xs font-medium text-slate-500">{patient.patient_code}</span></Link> : <span className="font-bold">{patient?.name || 'Patient record'}</span>;
+  };
+
+  return <div className="space-y-6">
+    <section className="rounded-3xl bg-gradient-to-r from-blue-800 via-blue-900 to-slate-900 p-6 text-white shadow-xl sm:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div><span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-blue-100">PHC HEAD · ASSIGNED FACILITY ONLY</span>
+          <h1 className="mt-3 text-2xl font-black sm:text-4xl">{facility?.name || 'Your PHC dashboard'}</h1>
+          <p className="mt-2 text-sm text-blue-100">Patients, appointments, follow-ups, risks and referrals for your assigned centre.</p>
+          {facility && <p className="mt-1 text-xs text-blue-200">{[facility.address, facility.village, facility.district, facility.state].filter(Boolean).join(', ')}{facility.code ? ` · ${facility.code}` : ''}</p>}
+        </div>
+        <Link href="/patients?register=1" className="primary-btn bg-white text-blue-800 hover:bg-blue-50"><UserPlus className="h-4 w-4" /> Register new patient</Link>
+      </div>
+    </section>
+
+    {error && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">{error}</div>}
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="card p-5"><p className="text-xs font-bold uppercase text-slate-500">PHC patients</p><p className="mt-2 text-3xl font-black">{loading ? '…' : patients.length}</p></div>
+      <div className="card p-5"><p className="text-xs font-bold uppercase text-rose-700">Latest high risk</p><p className="mt-2 text-3xl font-black text-rose-700">{loading ? '…' : highRiskCount}</p></div>
+      <div className="card p-5"><p className="text-xs font-bold uppercase text-amber-700">Follow-ups due</p><p className="mt-2 text-3xl font-black text-amber-700">{loading ? '…' : dueFollowUps}</p></div>
+      <div className="card p-5"><p className="text-xs font-bold uppercase text-blue-700">Upcoming appointments</p><p className="mt-2 text-3xl font-black text-blue-700">{loading ? '…' : upcomingAppointments}</p></div>
+    </div>
+
+    <nav className="flex flex-wrap gap-2" aria-label="PHC patient care lists">
+      {tabs.map(([key, label]) => <button key={key} onClick={() => setActiveTab(key)} className={`rounded-xl px-4 py-2 text-sm font-bold ${activeTab === key ? 'bg-blue-600 text-white' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>{label}</button>)}
+    </nav>
+
+    {loading ? <section className="card p-10 text-center text-sm text-slate-500">Loading records for the assigned PHC…</section> : activeTab === 'overview' ? <div className="grid gap-5 xl:grid-cols-2">
+      <section className="card overflow-hidden"><div className="flex items-center justify-between border-b p-4"><h2 className="font-black">Patients & latest risk</h2><button onClick={() => setActiveTab('patients')} className="text-xs font-bold text-blue-700">View all</button></div>
+        {patients.slice(0, 6).map(patient => <div key={patient.id} className="flex items-center justify-between gap-3 border-b p-4 last:border-0"><div>{patientLink(patient.id)}<p className="mt-1 text-xs text-slate-500">{patient.village || 'Village not recorded'} · {patient.age} yrs</p></div>{riskBadge(patient.id)}</div>)}
+        {!patients.length && <p className="p-6 text-sm text-slate-500">No patients registered at this PHC yet.</p>}
+      </section>
+      <section className="card overflow-hidden"><div className="flex items-center justify-between border-b p-4"><h2 className="font-black">Upcoming appointments</h2><Link href="/appointments" className="text-xs font-bold text-blue-700">Open appointments</Link></div>
+        {appointments.filter(item => item.appointment_date.slice(0, 10) >= today && !['completed', 'cancelled'].includes(item.status)).slice(0, 6).map(item => <div key={item.id} className="flex items-center justify-between gap-3 border-b p-4 last:border-0"><div>{patientLink(item.patient_id)}<p className="mt-1 text-xs text-slate-500">{new Date(item.appointment_date).toLocaleString()} · {item.purpose || 'PHC visit'}</p></div>{riskBadge(item.patient_id)}</div>)}
+        {!appointments.some(item => item.appointment_date.slice(0, 10) >= today && !['completed', 'cancelled'].includes(item.status)) && <p className="p-6 text-sm text-slate-500">No upcoming appointments for this PHC.</p>}
+      </section>
+      <section className="card p-5"><h2 className="font-black">Follow-up list</h2><p className="mt-1 text-sm text-slate-600">{dueFollowUps} due or overdue · {followUps.length} total</p><button onClick={() => setActiveTab('followups')} className="mt-3 text-sm font-bold text-blue-700">View follow-ups →</button></section>
+      <section className="card p-5"><h2 className="font-black">Referral tracking</h2><p className="mt-1 text-sm text-slate-600">{referrals.length} referrals linked to patients at this PHC.</p><button onClick={() => setActiveTab('referrals')} className="mt-3 text-sm font-bold text-blue-700">View referral details →</button></section>
+    </div> : activeTab === 'patients' ? <section className="card overflow-x-auto"><table className="w-full min-w-[800px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Patient / PID</th><th className="p-3">Age / gender</th><th className="p-3">Village</th><th className="p-3">Latest risk</th><th className="p-3">Next follow-up</th><th className="p-3">Record</th></tr></thead><tbody>{patients.map(patient => <tr key={patient.id} className="border-t"><td className="p-3">{patientLink(patient.id)}</td><td className="p-3">{patient.age} · {patient.gender}</td><td className="p-3">{patient.village || 'Not recorded'}</td><td className="p-3">{riskBadge(patient.id)}</td><td className="p-3">{patient.next_follow_up_date || 'Not scheduled'}</td><td className="p-3"><Link className="font-bold text-blue-700" href={`/patients/${encodeURIComponent(patient.patient_code || patient.id)}`}>Details →</Link></td></tr>)}</tbody></table>{!patients.length && <p className="p-6 text-sm text-slate-500">No registered patients for this assigned PHC.</p>}</section> : activeTab === 'appointments' ? <section className="card overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Patient</th><th className="p-3">Date</th><th className="p-3">Purpose</th><th className="p-3">Risk</th><th className="p-3">Status</th></tr></thead><tbody>{appointments.map(item => <tr key={item.id} className="border-t"><td className="p-3">{patientLink(item.patient_id)}</td><td className="p-3">{new Date(item.appointment_date).toLocaleString()}</td><td className="p-3">{item.purpose || 'PHC visit'}</td><td className="p-3">{riskBadge(item.patient_id)}</td><td className="p-3 capitalize">{item.status.replaceAll('_', ' ')}</td></tr>)}</tbody></table>{!appointments.length && <p className="p-6 text-sm text-slate-500">No appointments for this PHC.</p>}</section> : activeTab === 'followups' ? <section className="card overflow-x-auto"><table className="w-full min-w-[700px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Patient</th><th className="p-3">Date</th><th className="p-3">Care plan / notes</th><th className="p-3">Risk</th><th className="p-3">Status</th></tr></thead><tbody>{followUps.map(item => <tr key={item.id} className="border-t"><td className="p-3">{patientLink(item.patient_id)}</td><td className="p-3">{item.scheduled_date}</td><td className="p-3">{item.notes || 'Follow-up care'}</td><td className="p-3">{riskBadge(item.patient_id)}</td><td className="p-3 capitalize">{item.status}</td></tr>)}</tbody></table>{!followUps.length && <p className="p-6 text-sm text-slate-500">No follow-ups recorded for this PHC.</p>}</section> : <section className="card overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Patient</th><th className="p-3">Receiving facility</th><th className="p-3">Reason / clinical notes</th><th className="p-3">Risk</th><th className="p-3">Status</th></tr></thead><tbody>{referrals.map(item => <tr key={item.id} className="border-t"><td className="p-3">{patientLink(item.patient_id)}</td><td className="p-3">{item.referred_to_text || 'Not recorded'}</td><td className="p-3">{item.reason}{item.clinical_notes ? <small className="mt-1 block text-slate-500">{item.clinical_notes}</small> : null}</td><td className="p-3">{riskBadge(item.patient_id)}</td><td className="p-3 capitalize">{item.status.replaceAll('_', ' ')}</td></tr>)}</tbody></table>{!referrals.length && <p className="p-6 text-sm text-slate-500">No referrals recorded for this PHC.</p>}</section>}
+  </div>;
+}
+
 function PhcHeadDashboard({ profile }: { profile: any }) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'patients' | 'doctors' | 'phcs' | 'workers' | 'demands'>('overview');
