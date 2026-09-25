@@ -171,10 +171,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {nav.map(({ href, label, icon: Icon }) => {
             const isSelected = path === `/${href}` || (href === 'dashboard' && path === '/dashboard') || (href === 'patient-dashboard' && path === '/patient-dashboard');
             return (
-              <Link 
-                onClick={() => setOpen(false)} 
+              <a
                 key={href} 
-                href={`/${href}`} 
+                href={`/${href}`}
+                onClick={() => setOpen(false)}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors ${
                   isSelected 
                     ? 'bg-blue-600 text-white shadow-md' 
@@ -183,7 +183,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span>{label}</span>
-              </Link>
+              </a>
             );
           })}
         </nav>
@@ -241,8 +241,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <button 
                 type="button"
                 aria-label={t('notifications', 'Notifications')} 
+                aria-haspopup="menu"
+                aria-expanded={notifOpen}
+                aria-controls="dashboard-notifications-menu"
                 onClick={() => {
-                  setNotifOpen(!notifOpen);
+                  setNotifOpen(value => !value);
                   setProfileOpen(false);
                 }} 
                 className="relative rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50 transition cursor-pointer"
@@ -255,7 +258,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
               {/* Notification Popover Dropdown */}
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white p-4 shadow-2xl border border-slate-200 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div id="dashboard-notifications-menu" role="menu" className="absolute right-0 mt-2 w-80 rounded-2xl bg-white p-4 shadow-2xl border border-slate-200 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div className="flex items-center gap-2">
                       <Bell className="h-4 w-4 text-blue-600" />
@@ -283,13 +286,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-slate-100">
-                    <Link
+                    <a
                       href="/notifications"
                       onClick={() => setNotifOpen(false)}
                       className="block w-full text-center rounded-xl bg-blue-600 py-2 text-xs font-bold text-white hover:bg-blue-700 transition"
                     >
                       {t('viewAllNotifications', 'View All Notifications & Reminders →')}
-                    </Link>
+                    </a>
                   </div>
                 </div>
               )}
@@ -299,8 +302,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <div className="relative">
               <button
                 type="button"
+                aria-haspopup="menu"
+                aria-expanded={profileOpen}
+                aria-controls="dashboard-account-menu"
                 onClick={() => {
-                  setProfileOpen(!profileOpen);
+                  setProfileOpen(value => !value);
                   setNotifOpen(false);
                 }}
                 className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
@@ -314,38 +320,38 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
               {/* User Dropdown Menu */}
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white p-2 shadow-2xl border border-slate-200 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div id="dashboard-account-menu" role="menu" className="absolute right-0 mt-2 w-56 rounded-2xl bg-white p-2 shadow-2xl border border-slate-200 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-3 py-2 border-b border-slate-100 mb-1">
                     <p className="font-black text-xs text-slate-900 capitalize">{roleLabels[role] || 'Authorised User'}</p>
                     <p className="text-[10px] text-slate-500">GramCare Account Session</p>
                   </div>
 
-                  <Link
+                  <a
                     href={role === 'patient' ? '/patient-dashboard' : '/dashboard'}
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                   >
                     <LayoutDashboard className="h-4 w-4 text-blue-600" />
                     <span>Dashboard</span>
-                  </Link>
+                  </a>
 
-                  <Link
+                  {['central', 'head'].includes(role) && <a
                     href="/reports"
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                   >
                     <FileText className="h-4 w-4 text-emerald-600" />
                     <span>{t('medicalReportsStore', 'Medical Reports Store')}</span>
-                  </Link>
+                  </a>}
 
-                  <Link
+                  <a
                     href="/notifications"
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                   >
                     <Bell className="h-4 w-4 text-amber-600" />
                     <span>Notifications & Reminders</span>
-                  </Link>
+                  </a>
 
                   <div className="border-t border-slate-100 my-1" />
 
