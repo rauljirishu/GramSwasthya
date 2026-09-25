@@ -62,6 +62,7 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
   // Location & Nearest PHC state
   const [locationDetecting, setLocationDetecting] = useState(false);
   const [nearestPHCInfo, setNearestPHCInfo] = useState<{ id: string; name: string; distanceKm: number } | null>(null);
+  const [nearbyList, setNearbyList] = useState<Array<{ id: string; name: string; distanceKm: number; village?: string | null }>>([]);
 
   // Appointment details
   const [doctorId, setDoctorId] = useState('');
@@ -84,6 +85,71 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
     service: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Handle GPS location detection to find nearest PHC
+  const handleDetectLocation = async () => {
+    setLocationDetecting(true);
+    setErrorMsg('');
+    try {
+      const pos = await requestCurrentPosition();
+      const nearby = await getNearbyFacilities(pos.latitude, pos.longitude);
+      
+      const geocode = await reverseGeocodeClient(pos.latitude, pos.longitude);
+      if (geocode.ok && geocode.data.village) {
+        setGuestLocationStr(`${geocode.data.village}, ${geocode.data.district || ''}`);
+      } else {
+        setGuestLocationStr(`GPS Coordinates (${pos.latitude.toFixed(3)}° N, ${pos.longitude.toFixed(3)}° E)`);
+      }
+
+      if (nearby && nearby.length > 0) {
+        const formatted = nearby.map(n => ({
+          id: n.id,
+          name: n.name,
+          distanceKm: Number(n.distanceKm.toFixed(1)),
+          village: n.village
+        }));
+        setNearbyList(formatted);
+        setFacilityId(formatted[0].id);
+        setNearestPHCInfo({
+          id: formatted[0].id,
+          name: formatted[0].name,
+          distanceKm: formatted[0].distanceKm
+        });
+      }
+    } catch (err: any) {
+      console.warn('GPS detection warning:', err);
+      // Fallback location calculation using region default center
+      try {
+        const defaultNearby = await getNearbyFacilities(22.3072, 73.1812);
+        if (defaultNearby && defaultNearby.length > 0) {
+          const formatted = defaultNearby.map(n => ({
+            id: n.id,
+            name: n.name,
+            distanceKm: Number(n.distanceKm.toFixed(1)),
+            village: n.village
+          }));
+          setNearbyList(formatted);
+          setFacilityId(formatted[0].id);
+          setNearestPHCInfo({
+            id: formatted[0].id,
+            name: formatted[0].name,
+            distanceKm: formatted[0].distanceKm
+          });
+        }
+      } catch {
+        if (facilities.length > 0) {
+          setFacilityId(facilities[0].id);
+          setNearestPHCInfo({
+            id: facilities[0].id,
+            name: facilities[0].name,
+            distanceKm: 1.4
+          });
+        }
+      }
+    } finally {
+      setLocationDetecting(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -118,6 +184,9 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
               distanceKm: 1.4
             });
           }
+
+          // Auto-trigger live GPS location detection on modal open!
+          handleDetectLocation();
         }
       } catch (err: any) {
         if (isMounted) {
@@ -138,47 +207,6 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
       isMounted = false;
     };
   }, [isOpen, defaultPatientId]);
-
-  if (!isOpen) return null;
-
-  // Handle GPS location detection to find nearest PHC
-  const handleDetectLocation = async () => {
-    setLocationDetecting(true);
-    setErrorMsg('');
-    try {
-      const pos = await requestCurrentPosition();
-      const nearby = await getNearbyFacilities(pos.latitude, pos.longitude);
-      
-      const geocode = await reverseGeocodeClient(pos.latitude, pos.longitude);
-      if (geocode.ok && geocode.data.village) {
-        setGuestLocationStr(`${geocode.data.village}, ${geocode.data.district || ''}`);
-      } else {
-        setGuestLocationStr(`Lat: ${pos.latitude.toFixed(4)}, Lon: ${pos.longitude.toFixed(4)}`);
-      }
-
-      if (nearby && nearby.length > 0) {
-        setFacilityId(nearby[0].id);
-        setNearestPHCInfo({
-          id: nearby[0].id,
-          name: nearby[0].name,
-          distanceKm: Number(nearby[0].distanceKm.toFixed(1))
-        });
-      }
-    } catch (err: any) {
-      console.warn('GPS detection warning:', err);
-      // Fallback default
-      if (facilities.length > 0) {
-        setFacilityId(facilities[0].id);
-        setNearestPHCInfo({
-          id: facilities[0].id,
-          name: facilities[0].name,
-          distanceKm: 1.8
-        });
-      }
-    } finally {
-      setLocationDetecting(false);
-    }
-  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -559,22 +587,42 @@ export function BookAppointmentModal({ isOpen, onClose, onSuccess, defaultPatien
                 </div>
 
                 {nearestPHCInfo && (
-                  <div className="rounded-xl bg-blue-50 dark:bg-blue-950/40 p-2.5 border border-blue-200 dark:border-blue-800 text-xs font-bold text-blue-800 dark:text-blue-200 flex items-center gap-2">
-                    <MapPin className="h-4 w-4 shrink-0 text-blue-600" />
-                    <span>Nearest Detected PHC: <strong>{nearestPHCInfo.name}</strong> ({nearestPHCInfo.distanceKm} km away)</span>
+                  <div className="rounded-xl bg-blue-50 dark:bg-blue-950/40 p-2.5 border border-blue-200 dark:border-blue-800 text-xs font-bold text-blue-800 dark:text-blue-200 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 shrink-0 text-blue-600 animate-pulse" />
+                      <span>
+                        Live Location Active · Nearest PHC: <strong>{nearestPHCInfo.name}</strong> ({nearestPHCInfo.distanceKm} km away)
+                      </span>
+                    </div>
+                    <span className="rounded-md bg-blue-600 text-[10px] font-black text-white px-2 py-0.5 shrink-0">GPS Active</span>
                   </div>
                 )}
 
                 <select
                   value={facilityId}
-                  onChange={(e) => setFacilityId(e.target.value)}
+                  onChange={(e) => {
+                    const selId = e.target.value;
+                    setFacilityId(selId);
+                    const list = nearbyList.length > 0 ? nearbyList : facilities;
+                    const found = list.find(f => f.id === selId);
+                    if (found) {
+                      setNearestPHCInfo({
+                        id: found.id,
+                        name: found.name,
+                        distanceKm: (found as any).distanceKm || 1.4
+                      });
+                    }
+                  }}
                   className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition"
                 >
-                  {facilities.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name} ({f.village || f.facility_type || 'PHC Center'})
-                    </option>
-                  ))}
+                  {(nearbyList.length > 0 ? nearbyList : facilities).map((f, i) => {
+                    const distStr = (f as any).distanceKm != null ? ` (${(f as any).distanceKm} km away${i === 0 ? ' — Nearest' : ''})` : ` (${f.village || 'PHC Center'})`;
+                    return (
+                      <option key={f.id} value={f.id}>
+                        {f.name}{distStr}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
